@@ -3507,9 +3507,10 @@ electron-chromedriver@~1.8.0:
     electron-download "^4.1.0"
     extract-zip "^1.6.5"
 
-electron-devtools-installer@^2.2.3:
-  version "2.2.3"
-  resolved "https://registry.yarnpkg.com/electron-devtools-installer/-/electron-devtools-installer-2.2.3.tgz#58b9a4ec507377bc46e091cd43714188e0c369be"
+electron-devtools-installer@^2.2.4:
+  version "2.2.4"
+  resolved "https://registry.yarnpkg.com/electron-devtools-installer/-/electron-devtools-installer-2.2.4.tgz#261a50337e37121d338b966f07922eb4939a8763"
+  integrity sha512-b5kcM3hmUqn64+RUcHjjr8ZMpHS2WJ5YO0pnG9+P/RTdx46of/JrEjuciHWux6pE+On6ynWhHJF53j/EDJN0PA==
   dependencies:
     "7zip" "0.0.6"
     cross-unzip "0.0.2"
@@ -7746,9 +7747,9 @@ onetime@^2.0.0:
   dependencies:
     mimic-fn "^1.0.0"
 
-oni-api@0.0.49:
-  version "0.0.49"
-  resolved "https://registry.yarnpkg.com/oni-api/-/oni-api-0.0.49.tgz#4d2b7c23d63e6306e873d83de148b5f89856bb56"
+oni-api@hoschi/oni-api#cockpit:
+  version "0.0.50"
+  resolved "https://codeload.github.com/hoschi/oni-api/tar.gz/3ee8e6b46e8533d0337375156d255579b493b8e7"
 
 oni-core-logging@^1.0.0:
   version "1.0.0"

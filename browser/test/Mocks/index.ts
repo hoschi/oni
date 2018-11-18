@@ -14,6 +14,8 @@ export * from "./MockThemeLoader"
 import * as Oni from "oni-api"
 import { Event, IEvent } from "oni-types"
 
+import { Middleware, Reducer, Store } from "redux"
+
 import * as types from "vscode-languageserver-types"
 
 import { Editor } from "./../../src/Editor/Editor"
@@ -377,6 +379,15 @@ export class MockOni implements Oni.Plugin.Api {
     }
 
     public populateQuickFix(entries: Oni.QuickFixEntry[]): void {
+        throw Error("Not yet implemented")
+    }
+
+    public createReduxStore<TState>(
+        name: string,
+        reducer: Reducer<TState>,
+        defaultState: TState,
+        optionalMiddleware: Middleware[],
+    ): Store<TState> {
         throw Error("Not yet implemented")
     }
 }

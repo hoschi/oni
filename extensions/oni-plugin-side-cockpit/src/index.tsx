@@ -1,20 +1,20 @@
 import { EventCallback, IDisposable, IEvent } from "oni-types"
-import { SideCockpitManager } from "./SideCockpitManager"
+import { CockpitManager } from "./CockpitManager"
 
 import * as Oni from "oni-api"
 
 export function activate(oni: any): any {
-    const sideCockpitManager = new SideCockpitManager(oni)
+    const cockpitManager = new CockpitManager(oni)
 
     oni.commands.registerCommand(
         new Command("sideCockpit.open", "Open side cockpit", "Open side cockpit pane", () => {
-            sideCockpitManager.open()
+            cockpitManager.open()
         }),
     )
 
-    sideCockpitManager.open()
+    cockpitManager.open()
 
-    return sideCockpitManager as any
+    return cockpitManager as any
 }
 
 class Command implements Oni.Commands.ICommand {
