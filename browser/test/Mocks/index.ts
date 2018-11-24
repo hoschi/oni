@@ -326,6 +326,10 @@ export class MockOni implements Oni.Plugin.Api {
         throw Error("Not yet implemented")
     }
 
+    get neovimEditorFactory(): any /* TODO */ {
+        throw Error("Not yet implemented")
+    }
+
     get notifications(): Oni.Notifications.Api {
         throw Error("Not yet implemented")
     }

@@ -90,6 +90,7 @@ export const start = async (args: string[]): Promise<void> => {
     const globalCommandsPromise = import("./Services/Commands/GlobalCommands")
     const inputManagerPromise = import("./Services/InputManager")
     const languageManagerPromise = import("./Services/Language")
+    const neovimEditorFactonyPromise = import("./Services/NeovimEditorFactory")
     const vcsManagerPromise = import("./Services/VersionControl")
     const notificationsPromise = import("./Services/Notifications")
     const snippetPromise = import("./Services/Snippets")
@@ -312,6 +313,9 @@ export const start = async (args: string[]): Promise<void> => {
     const Learning = await import("./Services/Learning")
     const Explorer = await import("./Services/Explorer")
     const Search = await import("./Services/Search")
+
+    const NeovimEditorFactory = await neovimEditorFactonyPromise
+    NeovimEditorFactory.activate()
 
     Sidebar.activate(configuration, workspace)
     const sidebarManager = Sidebar.getInstance()

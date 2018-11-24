@@ -35,6 +35,7 @@ import { getInstance as getOverlayInstance } from "./../../Services/Overlay"
 import { recorder } from "./../../Services/Recorder"
 import { getInstance as getSessionManagerInstance, SessionManager } from "./../../Services/Sessions"
 import { getInstance as getSidebarInstance } from "./../../Services/Sidebar"
+import { getInstance as getNeovimEditorFactory } from "./../../Services/NeovimEditorFactory"
 import { getInstance as getSneakInstance } from "./../../Services/Sneak"
 import { getInstance as getSnippetsInstance } from "./../../Services/Snippets"
 import { getInstance as getStatusBarInstance } from "./../../Services/StatusBar"
@@ -150,6 +151,10 @@ export class Oni implements OniApi.Plugin.Api {
 
     public get sidebar(): any {
         return getSidebarInstance()
+    }
+
+    public get neovimEditorFactory(): any {
+        return getNeovimEditorFactory()
     }
 
     public get sneak(): any {
