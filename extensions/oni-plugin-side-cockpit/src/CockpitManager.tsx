@@ -2,6 +2,7 @@ import * as Oni from "oni-api"
 import * as React from "react"
 import { Provider } from "react-redux"
 import { Reducer, Store } from "redux"
+import { CockpitEditor } from "./CockpitEditor"
 
 export class CockpitTab {
     public bufferId: string | null
@@ -16,6 +17,7 @@ export interface ICockpitManagerState {
 export class CockpitManager implements Oni.IWindowSplit {
     private _split: Oni.WindowSplitHandle
     private _store: Store<ICockpitManagerState>
+    private _editor: Oni.Editor
 
     constructor(private _oni: Oni.Plugin.Api) {
         this._store = createStore(this._oni)
@@ -25,14 +27,17 @@ export class CockpitManager implements Oni.IWindowSplit {
         const editorSplit = this._oni.windows.activeSplitHandle
         this._split = this._oni.windows.createSplit("vertical", this)
         editorSplit.focus()
+
+        this._editor = this._oni.neovimEditorFactory.createEditor()
+        this._editor.init([])
     }
 
     public render(): JSX.Element {
-        // FIXME add something like "CockpitEditor" which is then the same as "YodeMainContent"
         return (
             <Provider store={this._store}>
                 <div>
                     <h1>Cockpit</h1>
+                    <CockpitEditor editor={this._editor} />
                     <div className="enable-mouse">
                         test:{" "}
                         <button
