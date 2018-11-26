@@ -17,7 +17,7 @@ export interface ICockpitManagerState {
 export class CockpitManager implements Oni.IWindowSplit {
     private _split: Oni.WindowSplitHandle
     private _store: Store<ICockpitManagerState>
-    private _editor: Oni.Editor
+    private _cockpitEditor: Oni.Editor
 
     constructor(private _oni: Oni.Plugin.Api) {
         this._store = createStore(this._oni)
@@ -28,8 +28,19 @@ export class CockpitManager implements Oni.IWindowSplit {
         this._split = this._oni.windows.createSplit("vertical", this)
         editorSplit.focus()
 
-        this._editor = this._oni.neovimEditorFactory.createEditor()
-        this._editor.init([])
+        this._cockpitEditor = this._oni.neovimEditorFactory.createEditor()
+        this._cockpitEditor.init([])
+    }
+
+    public pushToCockpit(): void {
+        const file = this._oni.editors.anyEditor.activeBuffer.filePath
+        if (!file) {
+            return
+        }
+
+        this._cockpitEditor.openFile(file, {
+            openMode: Oni.FileOpenMode.ExistingTab,
+        })
     }
 
     public render(): JSX.Element {
@@ -37,7 +48,7 @@ export class CockpitManager implements Oni.IWindowSplit {
             <Provider store={this._store}>
                 <div>
                     <h1>Cockpit</h1>
-                    <CockpitEditor editor={this._editor} />
+                    <CockpitEditor editor={this._cockpitEditor} />
                     <div className="enable-mouse">
                         test:{" "}
                         <button
