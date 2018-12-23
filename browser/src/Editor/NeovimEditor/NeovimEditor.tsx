@@ -581,6 +581,7 @@ export class NeovimEditor extends Editor implements Oni.Editor {
             })
 
             this._actions.setTabs(currentTabId, tabs)
+            this.notifyTabsUpdate(currentTabId)
         })
 
         // TODO: Does any disposal need to happen for the observables?

@@ -1,5 +1,6 @@
 import * as Oni from "oni-api"
 import * as React from "react"
+import { find } from "lodash"
 import { Provider } from "react-redux"
 import { Reducer, Store } from "redux"
 import { CockpitEditor } from "./CockpitEditor"
@@ -11,13 +12,14 @@ export class CockpitTab {
 
 export interface ICockpitManagerState {
     activeTabId: number
-    tabs: CockpitTab[]
+    tabs: { [id: number]: CockpitTab }
 }
 
 export class CockpitManager implements Oni.IWindowSplit {
     private _split: Oni.WindowSplitHandle
     private _store: Store<ICockpitManagerState>
     private _cockpitEditor: Oni.Editor
+    private _mainEditor: Oni.Editor
 
     constructor(private _oni: Oni.Plugin.Api) {
         this._store = createStore(this._oni)
@@ -28,19 +30,66 @@ export class CockpitManager implements Oni.IWindowSplit {
         this._split = this._oni.windows.createSplit("vertical", this)
         editorSplit.focus()
 
+        this._mainEditor = this._oni.editors.anyEditor
+        this._mainEditor.onTabsUpdate.subscribe(currentTabId => {
+            const state = this._store.getState()
+            if (state.activeTabId === currentTabId) {
+                // TODO check if one tab was deleted, delete tab state as well, or listen explicetly for "tab close" event, probably easier
+                return
+            }
+
+            const tab = state.tabs[currentTabId]
+            if (tab) {
+                if (tab.bufferId) {
+                    this.replaceCockpitBuffer(tab.bufferId)
+                } else {
+                    this.emptyCockpitEditor()
+                }
+            } else {
+                this._store.dispatch({
+                    type: "ADD_TAB",
+                    currentTabId,
+                })
+                this.emptyCockpitEditor()
+            }
+            this._store.dispatch({
+                type: "SET_CURRENT_TAB_ID",
+                currentTabId,
+            })
+        })
+
         this._cockpitEditor = this._oni.neovimEditorFactory.createEditor()
         this._cockpitEditor.init([])
     }
 
+    private replaceCockpitBuffer(bufferId: string): void {
+        // TODO add getBufferById from BufferManager to NeovimEditor
+        const buffer = find(this._mainEditor.getBuffers(), ({ id }) => id === bufferId)
+        if (!buffer) {
+            throw new Error("Can't find buffer by id: " + bufferId)
+        }
+        this.emptyCockpitEditor()
+        this._cockpitEditor.openFile(buffer.filePath, {
+            openMode: Oni.FileOpenMode.ExistingTab,
+        })
+    }
+
+    private emptyCockpitEditor(): void {
+        // https://www.reddit.com/r/vim/comments/8d4dee/how_do_i_close_all_files_but_not_quit_vim/
+        this._cockpitEditor.neovim.command(":bufdo bwipeout")
+    }
+
     public pushToCockpit(): void {
-        const file = this._oni.editors.anyEditor.activeBuffer.filePath
-        if (!file) {
+        const bufferId = this._mainEditor.activeBuffer.id
+        if (!bufferId) {
             return
         }
 
-        this._cockpitEditor.openFile(file, {
-            openMode: Oni.FileOpenMode.ExistingTab,
+        this._store.dispatch({
+            type: "SET_BUFFER",
+            bufferId: bufferId,
         })
+        this.replaceCockpitBuffer(bufferId)
     }
 
     public pushToEditor(): void {
@@ -48,7 +97,7 @@ export class CockpitManager implements Oni.IWindowSplit {
         if (!file) {
             return
         }
-        this._oni.editors.anyEditor.openFile(file, {
+        this._mainEditor.openFile(file, {
             openMode: Oni.FileOpenMode.ExistingTab,
         })
     }
@@ -80,17 +129,22 @@ export class CockpitManager implements Oni.IWindowSplit {
 }
 
 const DefaultCockpitManagerState: ICockpitManagerState = {
-    activeTabId: 0,
-    tabs: [new CockpitTab(0)],
+    activeTabId: null,
+    tabs: {},
 }
 
 type CockpitManagerActions =
     | {
-          type: "CLOSE_TAB"
-      }
-    | {
           type: "SET_BUFFER"
           bufferId: string | null
+      }
+    | {
+          type: "ADD_TAB"
+          currentTabId: number
+      }
+    | {
+          type: "SET_CURRENT_TAB_ID"
+          currentTabId: number
       }
 
 const cockpitManagerReducer: Reducer<ICockpitManagerState> = (
@@ -98,6 +152,30 @@ const cockpitManagerReducer: Reducer<ICockpitManagerState> = (
     action: CockpitManagerActions,
 ) => {
     switch (action.type) {
+        case "SET_BUFFER":
+            return {
+                ...state,
+                tabs: {
+                    ...state.tabs,
+                    [state.activeTabId]: {
+                        ...state.tabs[state.activeTabId],
+                        bufferId: action.bufferId,
+                    },
+                },
+            }
+        case "ADD_TAB":
+            return {
+                ...state,
+                tabs: {
+                    ...state.tabs,
+                    [action.currentTabId]: new CockpitTab(action.currentTabId),
+                },
+            }
+        case "SET_CURRENT_TAB_ID":
+            return {
+                ...state,
+                activeTabId: action.currentTabId,
+            }
         default:
             return state
     }

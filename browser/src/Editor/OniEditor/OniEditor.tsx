@@ -99,6 +99,10 @@ export class OniEditor extends Utility.Disposable implements Oni.Editor {
         return this._neovimEditor.onBufferScrolled
     }
 
+    public get onTabsUpdate(): IEvent<number> {
+        return this._neovimEditor.onTabsUpdate
+    }
+
     public get /* override */ activeBuffer(): Oni.Buffer {
         return this._neovimEditor.activeBuffer
     }

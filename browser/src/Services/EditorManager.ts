@@ -104,6 +104,7 @@ class AnyEditorProxy implements Oni.Editor {
     private _onBufferSaved = new Event<Oni.EditorBufferEventArgs>()
     private _onBufferScrolled = new Event<Oni.EditorBufferScrolledEventArgs>()
     private _onCursorMoved = new Event<Oni.Cursor>()
+    private _onTabsUpdate = new Event<number>()
 
     /**
      * API Methods
@@ -169,6 +170,10 @@ class AnyEditorProxy implements Oni.Editor {
         return this._onCursorMoved
     }
 
+    public get onTabsUpdate(): IEvent<number> {
+        return this._onTabsUpdate
+    }
+
     public dispose(): void {
         // tslint:disable-line
     }
@@ -228,6 +233,7 @@ class AnyEditorProxy implements Oni.Editor {
             newEditor.onBufferSaved.subscribe(val => this._onBufferSaved.dispatch(val)),
             newEditor.onBufferScrolled.subscribe(val => this._onBufferScrolled.dispatch(val)),
             newEditor.onCursorMoved.subscribe(val => this._onCursorMoved.dispatch(val)),
+            newEditor.onTabsUpdate.subscribe(val => this._onTabsUpdate.dispatch(val)),
         ]
     }
 
