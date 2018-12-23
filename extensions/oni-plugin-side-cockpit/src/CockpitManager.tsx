@@ -43,6 +43,16 @@ export class CockpitManager implements Oni.IWindowSplit {
         })
     }
 
+    public pushToEditor(): void {
+        const file = this._cockpitEditor.activeBuffer.filePath
+        if (!file) {
+            return
+        }
+        this._oni.editors.anyEditor.openFile(file, {
+            openMode: Oni.FileOpenMode.ExistingTab,
+        })
+    }
+
     public render(): JSX.Element {
         return (
             <Provider store={this._store}>

@@ -11,6 +11,7 @@ export function activate(oni: any): any {
             cockpitManager.open()
         }),
     )
+
     oni.commands.registerCommand(
         new Command(
             "sideCockpit.pushToCockpit",
@@ -18,6 +19,17 @@ export function activate(oni: any): any {
             "Push current buffer to Cockpit",
             () => {
                 cockpitManager.pushToCockpit()
+            },
+        ),
+    )
+
+    oni.commands.registerCommand(
+        new Command(
+            "sideCockpit.pushToEditor",
+            "Cockpit: Push to Editor",
+            "Push current cockpit buffer to Editor",
+            () => {
+                cockpitManager.pushToEditor()
             },
         ),
     )
