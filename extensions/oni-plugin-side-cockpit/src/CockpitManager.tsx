@@ -1,6 +1,6 @@
 import * as Oni from "oni-api"
 import * as React from "react"
-import { find } from "lodash"
+import { find, hasIn } from "lodash"
 import { Provider } from "react-redux"
 import { Reducer, Store } from "redux"
 import { CockpitEditor } from "./CockpitEditor"
@@ -13,6 +13,14 @@ export class CockpitTab {
 export interface ICockpitManagerState {
     activeTabId: number
     tabs: { [id: number]: CockpitTab }
+}
+
+interface BufferChangedEvent {
+    buffer: Oni.Buffer
+}
+
+function isActiveBuffer(buffer: Oni.Buffer | Oni.InactiveBuffer): buffer is Oni.Buffer {
+    return (buffer as Oni.Buffer).getLines !== undefined
 }
 
 export class CockpitManager implements Oni.IWindowSplit {
@@ -31,40 +39,58 @@ export class CockpitManager implements Oni.IWindowSplit {
         editorSplit.focus()
 
         this._mainEditor = this._oni.editors.anyEditor
-        this._mainEditor.onTabsUpdate.subscribe(currentTabId => {
-            const state = this._store.getState()
-            if (state.activeTabId === currentTabId) {
-                // TODO check if one tab was deleted, delete tab state as well, or listen explicetly for "tab close" event, probably easier
-                return
-            }
 
-            const tab = state.tabs[currentTabId]
-            if (tab) {
-                if (tab.bufferId) {
-                    this.replaceCockpitBuffer(tab.bufferId)
-                } else {
-                    this.emptyCockpitEditor()
-                }
-            } else {
-                this._store.dispatch({
-                    type: "ADD_TAB",
-                    currentTabId,
-                })
-                this.emptyCockpitEditor()
-            }
-            this._store.dispatch({
-                type: "SET_CURRENT_TAB_ID",
-                currentTabId,
-            })
-        })
+        this._mainEditor.onTabsUpdate.subscribe(this.onTabsUpdate.bind(this))
+        this._mainEditor.onBufferChanged.subscribe(this.onBufferChanged.bind(this))
 
         this._cockpitEditor = this._oni.neovimEditorFactory.createEditor()
         this._cockpitEditor.init([])
     }
 
-    private replaceCockpitBuffer(bufferId: string): void {
-        // TODO add getBufferById from BufferManager to NeovimEditor
-        const buffer = find(this._mainEditor.getBuffers(), ({ id }) => id === bufferId)
+    private async onTabsUpdate(currentTabId: number): Promise<void> {
+        const state = this._store.getState()
+        if (state.activeTabId === currentTabId) {
+            // TODO check if one tab was deleted, delete tab state as well, or listen explicetly for "tab close" event, probably easier
+            return
+        }
+
+        const tab = state.tabs[currentTabId]
+        if (tab) {
+            if (tab.bufferId) {
+                await this.replaceCockpitBuffer(tab.bufferId)
+            } else {
+                this.emptyCockpitEditor()
+            }
+        } else {
+            this._store.dispatch({
+                type: "ADD_TAB",
+                currentTabId,
+            })
+            this.emptyCockpitEditor()
+        }
+        this._store.dispatch({
+            type: "SET_CURRENT_TAB_ID",
+            currentTabId,
+        })
+    }
+
+    private onBufferChanged({ buffer }: BufferChangedEvent): void {
+        this._oni.log.info(`sc - buffer changed "${buffer.id}" modified:${buffer.modified}`)
+        const state = this._store.getState()
+        const activeTab = state.tabs[state.activeTabId]
+        if (buffer.id !== activeTab.bufferId) {
+            return
+        }
+
+        if (buffer.modified) {
+            this.applyDirtyBufferChanges(buffer)
+        } else {
+            this._cockpitEditor.neovim.command(":e!")
+        }
+    }
+
+    private async replaceCockpitBuffer(bufferId: string): Promise<void> {
+        let buffer = this.getMainEditorBuffer(bufferId)
         if (!buffer) {
             throw new Error("Can't find buffer by id: " + bufferId)
         }
@@ -72,11 +98,39 @@ export class CockpitManager implements Oni.IWindowSplit {
         this._cockpitEditor.openFile(buffer.filePath, {
             openMode: Oni.FileOpenMode.ExistingTab,
         })
+
+        if (buffer.modified) {
+            if (isActiveBuffer(buffer)) {
+                this.applyDirtyBufferChanges(buffer as Oni.Buffer)
+            } else {
+                const reponse = await this._mainEditor.neovim.request<void>("nvim_call_atomic", [
+                    [["nvim_command", [":vsp"]], ["nvim_command", [":b " + bufferId]]],
+                ])
+
+                buffer = this.getMainEditorBuffer(bufferId)
+                this.applyDirtyBufferChanges(buffer as Oni.Buffer)
+                this._mainEditor.neovim.command(":q")
+            }
+        }
+    }
+
+    private getMainEditorBuffer(bufferId: string): Oni.Buffer | Oni.InactiveBuffer {
+        // TODO add getBufferById from BufferManager to NeovimEditor
+        return find(this._mainEditor.getBuffers(), ({ id }) => id === bufferId)
+    }
+
+    private async applyDirtyBufferChanges(buffer: Oni.Buffer): Promise<void> {
+        const lines = await buffer.getLines()
+        this._cockpitEditor.activeBuffer.setLines(
+            0,
+            this._cockpitEditor.activeBuffer.lineCount,
+            lines,
+        )
     }
 
     private emptyCockpitEditor(): void {
         // https://www.reddit.com/r/vim/comments/8d4dee/how_do_i_close_all_files_but_not_quit_vim/
-        this._cockpitEditor.neovim.command(":bufdo bwipeout")
+        this._cockpitEditor.neovim.command(":bufdo bwipeout!")
     }
 
     public pushToCockpit(): void {
