@@ -15,10 +15,6 @@ export interface ICockpitManagerState {
     tabs: { [id: number]: CockpitTab }
 }
 
-interface BufferChangedEvent {
-    buffer: Oni.Buffer
-}
-
 function isActiveBuffer(buffer: Oni.Buffer | Oni.InactiveBuffer): buffer is Oni.Buffer {
     return (buffer as Oni.Buffer).getLines !== undefined
 }
@@ -42,6 +38,7 @@ export class CockpitManager implements Oni.IWindowSplit {
 
         this._mainEditor.onTabsUpdate.subscribe(this.onTabsUpdate.bind(this))
         this._mainEditor.onBufferChanged.subscribe(this.onBufferChanged.bind(this))
+        this._mainEditor.onBufferSaved.subscribe(this.onBufferSaved.bind(this))
 
         this._cockpitEditor = this._oni.neovimEditorFactory.createEditor()
         this._cockpitEditor.init([])
@@ -74,11 +71,19 @@ export class CockpitManager implements Oni.IWindowSplit {
         })
     }
 
-    private onBufferChanged({ buffer }: BufferChangedEvent): void {
+    private onBufferSaved(evt: Oni.EditorBufferSavedEventArgs): void {
+        this._oni.log.info(`sc - buffer saved "${evt.id}"`)
+        const activeTab = this.getActiveTabState()
+        if (!activeTab || evt.id !== activeTab.bufferId) {
+            return
+        }
+        this._cockpitEditor.neovim.command(":e!")
+    }
+
+    private onBufferChanged({ buffer }: Oni.EditorBufferChangedEventArgs): void {
         this._oni.log.info(`sc - buffer changed "${buffer.id}" modified:${buffer.modified}`)
-        const state = this._store.getState()
-        const activeTab = state.tabs[state.activeTabId]
-        if (buffer.id !== activeTab.bufferId) {
+        const activeTab = this.getActiveTabState()
+        if (!activeTab || buffer.id !== activeTab.bufferId) {
             return
         }
 
@@ -131,6 +136,11 @@ export class CockpitManager implements Oni.IWindowSplit {
     private emptyCockpitEditor(): void {
         // https://www.reddit.com/r/vim/comments/8d4dee/how_do_i_close_all_files_but_not_quit_vim/
         this._cockpitEditor.neovim.command(":bufdo bwipeout!")
+    }
+
+    private getActiveTabState(): CockpitTab | void {
+        const state = this._store.getState()
+        return state.tabs[state.activeTabId]
     }
 
     public pushToCockpit(): void {

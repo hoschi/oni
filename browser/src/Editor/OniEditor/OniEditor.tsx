@@ -91,7 +91,7 @@ export class OniEditor extends Utility.Disposable implements Oni.Editor {
         return this._neovimEditor.onBufferChanged
     }
 
-    public get onBufferSaved(): IEvent<Oni.EditorBufferEventArgs> {
+    public get onBufferSaved(): IEvent<Oni.EditorBufferSavedEventArgs> {
         return this._neovimEditor.onBufferSaved
     }
 

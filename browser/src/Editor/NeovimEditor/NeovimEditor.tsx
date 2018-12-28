@@ -1244,6 +1244,7 @@ export class NeovimEditor extends Editor implements Oni.Editor {
         this._actions.bufferSave(evt.bufferNumber, evt.modified, evt.version)
 
         this.notifyBufferSaved({
+            id: evt.bufferNumber.toString(),
             filePath: evt.bufferFullPath,
             language: evt.filetype,
         })

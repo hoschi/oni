@@ -19,7 +19,7 @@ export abstract class Editor extends Disposable implements Oni.Editor {
     private _onBufferEnterEvent = new Event<Oni.EditorBufferEventArgs>()
     private _onBufferLeaveEvent = new Event<Oni.EditorBufferEventArgs>()
     private _onBufferChangedEvent = new Event<Oni.EditorBufferChangedEventArgs>()
-    private _onBufferSavedEvent = new Event<Oni.EditorBufferEventArgs>()
+    private _onBufferSavedEvent = new Event<Oni.EditorBufferSavedEventArgs>()
     private _onBufferScrolledEvent = new Event<Oni.EditorBufferScrolledEventArgs>()
     private _onCursorMoved = new Event<Oni.Cursor>()
     private _onModeChangedEvent = new Event<Oni.Vim.Mode>()
@@ -57,7 +57,7 @@ export abstract class Editor extends Disposable implements Oni.Editor {
         return this._onBufferChangedEvent
     }
 
-    public get onBufferSaved(): IEvent<Oni.EditorBufferEventArgs> {
+    public get onBufferSaved(): IEvent<Oni.EditorBufferSavedEventArgs> {
         return this._onBufferSavedEvent
     }
 
@@ -117,7 +117,7 @@ export abstract class Editor extends Disposable implements Oni.Editor {
         this._onBufferLeaveEvent.dispatch(bufferEvent)
     }
 
-    protected notifyBufferSaved(bufferEvent: Oni.EditorBufferEventArgs): void {
+    protected notifyBufferSaved(bufferEvent: Oni.EditorBufferSavedEventArgs): void {
         this._onBufferSavedEvent.dispatch(bufferEvent)
     }
 
