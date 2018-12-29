@@ -20,32 +20,32 @@ function isActiveBuffer(buffer: Oni.Buffer | Oni.InactiveBuffer): buffer is Oni.
 }
 
 export class CockpitManager implements Oni.IWindowSplit {
-    private _split: Oni.WindowSplitHandle
-    private _store: Store<ICockpitManagerState>
-    private _cockpitEditor: Oni.Editor
-    private _mainEditor: Oni.Editor
+    private split: Oni.WindowSplitHandle
+    private store: Store<ICockpitManagerState>
+    private cockpitEditor: Oni.Editor
+    private mainEditor: Oni.Editor
 
-    constructor(private _oni: Oni.Plugin.Api) {
-        this._store = createStore(this._oni)
+    constructor(private oni: Oni.Plugin.Api) {
+        this.store = createStore(this.oni)
     }
 
     public open(): void {
-        const editorSplit = this._oni.windows.activeSplitHandle
-        this._split = this._oni.windows.createSplit("vertical", this)
+        const editorSplit = this.oni.windows.activeSplitHandle
+        this.split = this.oni.windows.createSplit("vertical", this)
         editorSplit.focus()
 
-        this._mainEditor = this._oni.editors.anyEditor
+        this.mainEditor = this.oni.editors.anyEditor
 
-        this._mainEditor.onTabsUpdate.subscribe(this.onTabsUpdate.bind(this))
-        this._mainEditor.onBufferChanged.subscribe(this.onBufferChanged.bind(this))
-        this._mainEditor.onBufferSaved.subscribe(this.onBufferSaved.bind(this))
+        this.mainEditor.onTabsUpdate.subscribe(this.onTabsUpdate.bind(this))
+        this.mainEditor.onBufferChanged.subscribe(this.onBufferChanged.bind(this))
+        this.mainEditor.onBufferSaved.subscribe(this.onBufferSaved.bind(this))
 
-        this._cockpitEditor = this._oni.neovimEditorFactory.createEditor()
-        this._cockpitEditor.init([])
+        this.cockpitEditor = this.oni.neovimEditorFactory.createEditor()
+        this.cockpitEditor.init([])
     }
 
     private async onTabsUpdate(currentTabId: number): Promise<void> {
-        const state = this._store.getState()
+        const state = this.store.getState()
         if (state.activeTabId === currentTabId) {
             // TODO check if one tab was deleted, delete tab state as well, or listen explicetly for "tab close" event, probably easier
             return
@@ -59,29 +59,29 @@ export class CockpitManager implements Oni.IWindowSplit {
                 this.emptyCockpitEditor()
             }
         } else {
-            this._store.dispatch({
+            this.store.dispatch({
                 type: "ADD_TAB",
                 currentTabId,
             })
             this.emptyCockpitEditor()
         }
-        this._store.dispatch({
+        this.store.dispatch({
             type: "SET_CURRENT_TAB_ID",
             currentTabId,
         })
     }
 
     private onBufferSaved(evt: Oni.EditorBufferSavedEventArgs): void {
-        this._oni.log.info(`sc - buffer saved "${evt.id}"`)
+        this.oni.log.info(`sc - buffer saved "${evt.id}"`)
         const activeTab = this.getActiveTabState()
         if (!activeTab || evt.id !== activeTab.bufferId) {
             return
         }
-        this._cockpitEditor.neovim.command(":e!")
+        this.cockpitEditor.neovim.command(":e!")
     }
 
     private onBufferChanged({ buffer }: Oni.EditorBufferChangedEventArgs): void {
-        this._oni.log.info(`sc - buffer changed "${buffer.id}" modified:${buffer.modified}`)
+        this.oni.log.info(`sc - buffer changed "${buffer.id}" modified:${buffer.modified}`)
         const activeTab = this.getActiveTabState()
         if (!activeTab || buffer.id !== activeTab.bufferId) {
             return
@@ -90,7 +90,7 @@ export class CockpitManager implements Oni.IWindowSplit {
         if (buffer.modified) {
             this.applyDirtyBufferChanges(buffer)
         } else {
-            this._cockpitEditor.neovim.command(":e!")
+            this.cockpitEditor.neovim.command(":e!")
         }
     }
 
@@ -100,7 +100,7 @@ export class CockpitManager implements Oni.IWindowSplit {
             throw new Error("Can't find buffer by id: " + bufferId)
         }
         this.emptyCockpitEditor()
-        this._cockpitEditor.openFile(buffer.filePath, {
+        this.cockpitEditor.openFile(buffer.filePath, {
             openMode: Oni.FileOpenMode.ExistingTab,
         })
 
@@ -108,48 +108,48 @@ export class CockpitManager implements Oni.IWindowSplit {
             if (isActiveBuffer(buffer)) {
                 this.applyDirtyBufferChanges(buffer as Oni.Buffer)
             } else {
-                const reponse = await this._mainEditor.neovim.request<void>("nvim_call_atomic", [
+                const reponse = await this.mainEditor.neovim.request<void>("nvim_call_atomic", [
                     [["nvim_command", [":vsp"]], ["nvim_command", [":b " + bufferId]]],
                 ])
 
                 buffer = this.getMainEditorBuffer(bufferId)
                 this.applyDirtyBufferChanges(buffer as Oni.Buffer)
-                this._mainEditor.neovim.command(":q")
+                this.mainEditor.neovim.command(":q")
             }
         }
     }
 
     private getMainEditorBuffer(bufferId: string): Oni.Buffer | Oni.InactiveBuffer {
         // TODO add getBufferById from BufferManager to NeovimEditor
-        return find(this._mainEditor.getBuffers(), ({ id }) => id === bufferId)
+        return find(this.mainEditor.getBuffers(), ({ id }) => id === bufferId)
     }
 
     private async applyDirtyBufferChanges(buffer: Oni.Buffer): Promise<void> {
         const lines = await buffer.getLines()
-        this._cockpitEditor.activeBuffer.setLines(
+        this.cockpitEditor.activeBuffer.setLines(
             0,
-            this._cockpitEditor.activeBuffer.lineCount,
+            this.cockpitEditor.activeBuffer.lineCount,
             lines,
         )
     }
 
     private emptyCockpitEditor(): void {
         // https://www.reddit.com/r/vim/comments/8d4dee/how_do_i_close_all_files_but_not_quit_vim/
-        this._cockpitEditor.neovim.command(":bufdo bwipeout!")
+        this.cockpitEditor.neovim.command(":bufdo bwipeout!")
     }
 
     private getActiveTabState(): CockpitTab | void {
-        const state = this._store.getState()
+        const state = this.store.getState()
         return state.tabs[state.activeTabId]
     }
 
     public pushToCockpit(): void {
-        const bufferId = this._mainEditor.activeBuffer.id
+        const bufferId = this.mainEditor.activeBuffer.id
         if (!bufferId) {
             return
         }
 
-        this._store.dispatch({
+        this.store.dispatch({
             type: "SET_BUFFER",
             bufferId: bufferId,
         })
@@ -157,27 +157,27 @@ export class CockpitManager implements Oni.IWindowSplit {
     }
 
     public pushToEditor(): void {
-        const file = this._cockpitEditor.activeBuffer.filePath
+        const file = this.cockpitEditor.activeBuffer.filePath
         if (!file) {
             return
         }
-        this._mainEditor.openFile(file, {
+        this.mainEditor.openFile(file, {
             openMode: Oni.FileOpenMode.ExistingTab,
         })
     }
 
     public render(): JSX.Element {
         return (
-            <Provider store={this._store}>
+            <Provider store={this.store}>
                 <div>
                     <h1>Cockpit</h1>
-                    <CockpitEditor editor={this._cockpitEditor} />
+                    <CockpitEditor editor={this.cockpitEditor} />
                     <div className="enable-mouse">
                         test:{" "}
                         <button
                             onClick={() => {
-                                this._oni.log.info("sc: test")
-                                this._store.dispatch({
+                                this.oni.log.info("sc: test")
+                                this.store.dispatch({
                                     type: "SET_BUFFER",
                                     bufferId: "./test.js",
                                 })
