@@ -108,7 +108,7 @@ export class CockpitManager implements Oni.IWindowSplit {
             if (isActiveBuffer(buffer)) {
                 this.applyDirtyBufferChanges(buffer as Oni.Buffer)
             } else {
-                const reponse = await this.mainEditor.neovim.request<void>("nvim_call_atomic", [
+                await this.mainEditor.neovim.request<void>("nvim_call_atomic", [
                     [["nvim_command", [":vsp"]], ["nvim_command", [":b " + bufferId]]],
                 ])
 
