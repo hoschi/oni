@@ -7,6 +7,7 @@ import { CockpitEditor } from "./CockpitEditor"
 
 export class CockpitTab {
     public bufferId: string | null
+    public topLine: number | null
     constructor(public tabId: number) {}
 }
 
@@ -51,10 +52,14 @@ export class CockpitManager implements Oni.IWindowSplit {
             return
         }
 
-        const tab = state.tabs[currentTabId]
-        if (tab) {
-            if (tab.bufferId) {
-                await this.replaceCockpitBuffer(tab.bufferId)
+        this.store.dispatch({
+            type: "SET_CURRENT_TAB_ID",
+            currentTabId,
+        })
+        const activeTab = this.getActiveTabState()
+        if (activeTab) {
+            if (activeTab.bufferId) {
+                await this.replaceCockpitBuffer(activeTab.bufferId)
             } else {
                 this.emptyCockpitEditor()
             }
@@ -65,16 +70,12 @@ export class CockpitManager implements Oni.IWindowSplit {
             })
             this.emptyCockpitEditor()
         }
-        this.store.dispatch({
-            type: "SET_CURRENT_TAB_ID",
-            currentTabId,
-        })
     }
 
     private onBufferSaved(evt: Oni.EditorBufferSavedEventArgs): void {
         this.oni.log.info(`sc - buffer saved "${evt.id}"`)
         const activeTab = this.getActiveTabState()
-        if (!activeTab || evt.id !== activeTab.bufferId) {
+        if (evt.id !== activeTab.bufferId) {
             return
         }
         this.cockpitEditor.neovim.command(":e!")
@@ -83,7 +84,7 @@ export class CockpitManager implements Oni.IWindowSplit {
     private onBufferChanged({ buffer }: Oni.EditorBufferChangedEventArgs): void {
         this.oni.log.info(`sc - buffer changed "${buffer.id}" modified:${buffer.modified}`)
         const activeTab = this.getActiveTabState()
-        if (!activeTab || buffer.id !== activeTab.bufferId) {
+        if (buffer.id !== activeTab.bufferId) {
             return
         }
 
@@ -117,6 +118,14 @@ export class CockpitManager implements Oni.IWindowSplit {
                 this.mainEditor.neovim.command(":q")
             }
         }
+        const activeTab = this.getActiveTabState()
+        await this.setEditorCursorToState(this.cockpitEditor, activeTab.topLine)
+    }
+
+    private async setEditorCursorToState(editor: Oni.Editor, topLine: number): Promise<void> {
+        const buffer = editor.activeBuffer
+        await buffer.setCursorPosition(topLine, 0)
+        editor.neovim.input("z<CR>")
     }
 
     private getMainEditorBuffer(bufferId: string): Oni.Buffer | Oni.InactiveBuffer {
@@ -138,32 +147,32 @@ export class CockpitManager implements Oni.IWindowSplit {
         this.cockpitEditor.neovim.command(":bufdo bwipeout!")
     }
 
-    private getActiveTabState(): CockpitTab | void {
+    private getActiveTabState(): CockpitTab {
         const state = this.store.getState()
         return state.tabs[state.activeTabId]
     }
 
-    public pushToCockpit(): void {
-        const bufferId = this.mainEditor.activeBuffer.id
-        if (!bufferId) {
+    public async pushToCockpit(): Promise<void> {
+        const buffer = this.mainEditor.activeBuffer
+        if (!buffer) {
             return
         }
-
+        const pos = await buffer.getCursorPosition()
         this.store.dispatch({
             type: "SET_BUFFER",
-            bufferId: bufferId,
+            bufferId: buffer.id,
+            topLine: pos.line,
         })
-        this.replaceCockpitBuffer(bufferId)
+        this.replaceCockpitBuffer(buffer.id)
     }
 
-    public pushToEditor(): void {
-        const file = this.cockpitEditor.activeBuffer.filePath
-        if (!file) {
+    public async pushToEditor(): Promise<void> {
+        const activeTab = this.getActiveTabState()
+        if (!activeTab.bufferId) {
             return
         }
-        this.mainEditor.openFile(file, {
-            openMode: Oni.FileOpenMode.ExistingTab,
-        })
+        this.mainEditor.neovim.command(`:b ${activeTab.bufferId}`)
+        await this.setEditorCursorToState(this.mainEditor, activeTab.topLine)
     }
 
     public render(): JSX.Element {
@@ -180,6 +189,7 @@ export class CockpitManager implements Oni.IWindowSplit {
                                 this.store.dispatch({
                                     type: "SET_BUFFER",
                                     bufferId: "./test.js",
+                                    topLine: 0,
                                 })
                             }}
                         >
@@ -201,6 +211,7 @@ type CockpitManagerActions =
     | {
           type: "SET_BUFFER"
           bufferId: string | null
+          topLine: number
       }
     | {
           type: "ADD_TAB"
@@ -224,6 +235,7 @@ const cockpitManagerReducer: Reducer<ICockpitManagerState> = (
                     [state.activeTabId]: {
                         ...state.tabs[state.activeTabId],
                         bufferId: action.bufferId,
+                        topLine: action.topLine,
                     },
                 },
             }
