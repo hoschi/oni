@@ -175,6 +175,30 @@ export class CockpitManager implements Oni.IWindowSplit {
         await this.setEditorCursorToState(this.mainEditor, activeTab.topLine)
     }
 
+    public async swapEditors(): Promise<void> {
+        const buffer = this.mainEditor.activeBuffer
+        const activeTab = this.getActiveTabState()
+
+        if (!buffer.filePath && !activeTab.bufferId) {
+            return
+        } else if (!buffer.filePath) {
+            return this.pushToEditor()
+        } else if (!activeTab.bufferId) {
+            return this.pushToCockpit()
+        } else {
+            // swap
+            await this.mainEditor.neovim.command(":norm H")
+            const posEditorBefore = await buffer.getCursorPosition()
+            this.pushToEditor()
+            this.store.dispatch({
+                type: "SET_BUFFER",
+                bufferId: buffer.id,
+                topLine: posEditorBefore.line,
+            })
+            this.replaceCockpitBuffer(buffer.id)
+        }
+    }
+
     public render(): JSX.Element {
         return (
             <Provider store={this.store}>

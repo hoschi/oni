@@ -34,6 +34,17 @@ export function activate(oni: any): any {
         ),
     )
 
+    oni.commands.registerCommand(
+        new Command(
+            "sideCockpit.swapEditors",
+            "Cockpit: Swap Editors",
+            "Swap sides so user can edit left or right",
+            () => {
+                cockpitManager.swapEditors()
+            },
+        ),
+    )
+
     cockpitManager.open()
 
     return cockpitManager as any
