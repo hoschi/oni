@@ -205,6 +205,32 @@ export class Buffer implements IBuffer {
         return types.Position.create(oneBasedLine - 1, oneBasedColumn - 1)
     }
 
+    public async attach(): Promise<boolean> {
+        const ret = await this._neovimInstance.request<boolean | string>("nvim_buf_attach", [
+            parseInt(this._id, 10),
+            false,
+            {},
+        ])
+        if (ret === true || ret === false) {
+            return ret
+        } else {
+            Log.error(`nvim_buf_attach errror: ${ret}`)
+            return false
+        }
+    }
+
+    public async detach(): Promise<boolean> {
+        const ret = await this._neovimInstance.request<boolean | string>("nvim_buf_detach", [
+            parseInt(this._id, 10),
+        ])
+        if (ret === true || ret === false) {
+            return ret
+        } else {
+            Log.error(`nvim_buf_detach errror: ${ret}`)
+            return false
+        }
+    }
+
     public async getLines(start?: number, end?: number): Promise<string[]> {
         if (typeof start !== "number") {
             start = 0

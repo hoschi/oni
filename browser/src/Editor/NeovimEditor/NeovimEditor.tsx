@@ -1209,6 +1209,8 @@ export class NeovimEditor extends Editor implements Oni.Editor {
         const lastBuffer = this.activeBuffer
         if (lastBuffer && lastBuffer.filePath !== buf.filePath) {
             this.notifyBufferLeave({
+                id: lastBuffer.id,
+                modified: lastBuffer.modified,
                 filePath: lastBuffer.filePath,
                 language: lastBuffer.language,
             })
