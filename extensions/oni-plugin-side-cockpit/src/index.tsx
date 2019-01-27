@@ -4,6 +4,10 @@ import { CockpitManager } from "./CockpitManager"
 import * as Oni from "oni-api"
 
 export function activate(oni: any): any {
+    if (!oni.configuration.getValue("experimental.sideCockpit.enabled", false)) {
+        return
+    }
+
     const cockpitManager = new CockpitManager(oni)
 
     oni.commands.registerCommand(
