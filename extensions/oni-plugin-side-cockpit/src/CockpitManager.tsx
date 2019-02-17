@@ -103,12 +103,12 @@ export class CockpitManager implements Oni.IWindowSplit {
         }
     }
 
-    private setCockpitBufferToDiskState(bufferId: string) {
+    private async setCockpitBufferToDiskState(bufferId: string): Promise<void> {
         const activeTab = this.getActiveTabState()
         if (bufferId !== activeTab.bufferId) {
             return
         }
-        this.cockpitEditor.neovim.command(":e!")
+        await this.cockpitEditor.neovim.command(":e!")
         this.setEditorCursorToState(this.cockpitEditor, activeTab.topLine)
     }
 
@@ -184,7 +184,7 @@ export class CockpitManager implements Oni.IWindowSplit {
                 await this.applyDirtyBufferChanges(activeBuffer)
             }
             await attachIfNeeded(activeBuffer)
-            this.mainEditor.neovim.command(":q")
+            await this.mainEditor.neovim.command(":q")
         }
 
         await this.setEditorCursorToState(this.cockpitEditor, activeTab.topLine)
@@ -257,7 +257,7 @@ export class CockpitManager implements Oni.IWindowSplit {
         if (!activeTab.bufferId) {
             return
         }
-        this.mainEditor.neovim.command(`:b ${activeTab.bufferId}`)
+        await this.mainEditor.neovim.command(`:b ${activeTab.bufferId}`)
         await this.setEditorCursorToState(this.mainEditor, activeTab.topLine)
     }
 
