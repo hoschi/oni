@@ -56,11 +56,7 @@ import {
     LanguageManager,
 } from "./../../Services/Language"
 
-import {
-    ISyntaxHighlighter,
-    NullSyntaxHighlighter,
-    SyntaxHighlighter,
-} from "./../../Services/SyntaxHighlighting"
+import { NullSyntaxHighlighter, SyntaxHighlighter } from "./../../Services/SyntaxHighlighting"
 
 import { MenuManager } from "./../../Services/Menu"
 import { IThemeMetadata, ThemeManager } from "./../../Services/Themes"
@@ -132,7 +128,7 @@ export class NeovimEditor extends Editor implements Oni.Editor {
     private _lastBufferId: string = null
 
     private _typingPredictionManager: TypingPredictionManager = new TypingPredictionManager()
-    private _syntaxHighlighter: ISyntaxHighlighter
+    private _syntaxHighlighter: Oni.ISyntaxHighlighter
     private _languageIntegration: LanguageEditorIntegration
     private _completion: Completion
     private _hoverRenderer: HoverRenderer
@@ -182,7 +178,7 @@ export class NeovimEditor extends Editor implements Oni.Editor {
         this._autoFocus = val
     }
 
-    public get syntaxHighlighter(): ISyntaxHighlighter {
+    public get syntaxHighlighter(): Oni.ISyntaxHighlighter {
         return this._syntaxHighlighter
     }
 

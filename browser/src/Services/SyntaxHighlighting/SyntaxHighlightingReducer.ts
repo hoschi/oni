@@ -132,7 +132,8 @@ export const linesReducer: Reducer<SyntaxHighlightLines> = (
         }
         case "SYNTAX_RESET_BUFFER":
             const resetState = Object.entries(state).reduce<SyntaxHighlightLines>(
-                (newResetState, [lineNumber, line]) => {
+                (newResetState, [lineNumber, ourLine]) => {
+                    const line = action.lines ? action.lines[lineNumber] : ourLine
                     newResetState[lineNumber] = {
                         tokens: [],
                         ruleStack: null,

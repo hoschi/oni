@@ -9,6 +9,7 @@ import * as types from "vscode-languageserver-types"
 import { StackElement } from "vscode-textmate"
 
 import * as Log from "oni-core-logging"
+import * as Oni from "oni-api"
 
 import * as PeriodicJobs from "./../../PeriodicJobs"
 import { createStore } from "./../../Redux"
@@ -21,15 +22,10 @@ import * as Selectors from "./SyntaxHighlightSelectors"
 
 const syntaxHighlightingJobs = new PeriodicJobs.PeriodicJobManager()
 
-export interface ISyntaxHighlightTokenInfo {
-    scopes: string[]
-    range: types.Range
-}
-
 export interface ISyntaxHighlightLineInfo {
     line: string
     ruleStack: StackElement
-    tokens: ISyntaxHighlightTokenInfo[]
+    tokens: Oni.ISyntaxHighlightTokenInfo[]
     dirty: boolean
 
     // The last version of the line that was 'tokenized'
@@ -76,6 +72,7 @@ export type ISyntaxHighlightAction =
     | {
           type: "SYNTAX_RESET_BUFFER"
           bufferId: string
+          lines: string[]
       }
     | {
           type: "SYNTAX_UPDATE_BUFFER"
@@ -96,7 +93,7 @@ export type ISyntaxHighlightAction =
           type: "SYNTAX_UPDATE_TOKENS_FOR_LINE"
           bufferId: string
           lineNumber: number
-          tokens: ISyntaxHighlightTokenInfo[]
+          tokens: Oni.ISyntaxHighlightTokenInfo[]
           ruleStack: StackElement
           version: number
       }
@@ -105,7 +102,7 @@ export type ISyntaxHighlightAction =
           bufferId: string
           line: string
           lineNumber: number
-          tokens: ISyntaxHighlightTokenInfo[]
+          tokens: Oni.ISyntaxHighlightTokenInfo[]
           ruleStack: StackElement
           version: number
       }

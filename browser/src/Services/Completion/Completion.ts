@@ -9,7 +9,6 @@ import * as types from "vscode-languageserver-types"
 
 import { LanguageManager } from "./../Language"
 import { SnippetManager } from "./../Snippets"
-import { ISyntaxHighlighter } from "./../SyntaxHighlighting"
 
 import { getFilteredCompletions } from "./CompletionSelectors"
 import { ICompletionsRequestor } from "./CompletionsRequestor"
@@ -50,7 +49,7 @@ export class Completion implements IDisposable {
         private _completionsRequestor: ICompletionsRequestor,
         private _languageManager: LanguageManager,
         private _snippetManager: SnippetManager,
-        private _syntaxHighlighter: ISyntaxHighlighter,
+        private _syntaxHighlighter: Oni.ISyntaxHighlighter,
     ) {
         this._completionsRequestor = this._completionsRequestor
         this._store = createStore(

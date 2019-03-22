@@ -1,5 +1,6 @@
 import * as Oni from "oni-api"
 import * as React from "react"
+import { Event } from "oni-types"
 import { find, hasIn } from "lodash"
 import { Provider } from "react-redux"
 import { Reducer, Store } from "redux"
@@ -55,8 +56,17 @@ export class CockpitManager implements Oni.IWindowSplit {
                 evt.lastline
             }, linedata count ${evt.linedata.length}`,
         )
-        this.cockpitEditor.activeBuffer.setLines(evt.firstline, evt.lastline, evt.linedata)
-        this.cockpitEditor.neovim.input("z<CR>")
+        await this.cockpitEditor.activeBuffer.setLines(evt.firstline, evt.lastline, evt.linedata)
+        await this.cockpitEditor.neovim.input("z<CR>")
+        if (evt.lastline - evt.firstline === 1 && evt.linedata.length === 1) {
+            // FIXME add method to SyntaxHighlighting.ts to just update one line in buffer
+        } else {
+            const allLines = await this.cockpitEditor.activeBuffer.getLines()
+            await this.cockpitEditor.syntaxHighlighter.updateBuffer(
+                allLines,
+                this.cockpitEditor.activeBuffer,
+            )
+        }
     }
 
     private async onBufDetachEvent(bufferId: string) {

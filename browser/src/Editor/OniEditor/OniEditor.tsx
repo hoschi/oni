@@ -35,7 +35,6 @@ import { MenuManager } from "./../../Services/Menu"
 import { OverlayManager } from "./../../Services/Overlay"
 
 import { SnippetManager } from "./../../Services/Snippets"
-import { ISyntaxHighlighter } from "./../../Services/SyntaxHighlighting"
 
 import { ThemeManager } from "./../../Services/Themes"
 import { TokenColors } from "./../../Services/TokenColors"
@@ -114,10 +113,6 @@ export class OniEditor extends Utility.Disposable implements Oni.Editor {
     // Capabilities
     public get neovim(): Oni.NeovimEditorCapability {
         return this._neovimEditor.neovim
-    }
-
-    public get syntaxHighlighter(): ISyntaxHighlighter {
-        return this._neovimEditor.syntaxHighlighter
     }
 
     constructor(

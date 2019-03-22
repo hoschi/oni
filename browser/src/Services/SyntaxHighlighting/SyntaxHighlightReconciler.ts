@@ -4,18 +4,14 @@
  * Handles enhanced syntax highlighting
  */
 
-import { Buffer, Editor } from "oni-api"
+import { Buffer, Editor, ISyntaxHighlightTokenInfo } from "oni-api"
 import * as Log from "oni-core-logging"
 
 import { prettyPrint } from "./../../Utility"
 import { TokenColor, TokenColors } from "./../TokenColors"
 
 import { HighlightInfo } from "./Definitions"
-import {
-    ISyntaxHighlightLineInfo,
-    ISyntaxHighlightState,
-    ISyntaxHighlightTokenInfo,
-} from "./SyntaxHighlightingStore"
+import { ISyntaxHighlightLineInfo, ISyntaxHighlightState } from "./SyntaxHighlightingStore"
 import { TokenScorer } from "./TokenScorer"
 
 import { IBufferHighlightsUpdater } from "../../Editor/BufferHighlights"

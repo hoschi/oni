@@ -17,7 +17,6 @@ import { createStore as oniCreateStore } from "./../../Redux"
 import { Configuration } from "./../Configuration"
 import { LanguageManager } from "./../Language"
 import { SnippetManager } from "./../Snippets"
-import { ISyntaxHighlighter } from "./../SyntaxHighlighting"
 
 import * as CompletionSelects from "./CompletionSelectors"
 import { ICompletionsRequestor } from "./CompletionsRequestor"
@@ -208,7 +207,7 @@ const nullAction: CompletionAction = { type: null } as CompletionAction
 const createGetCompletionMeetEpic = (
     languageManager: LanguageManager,
     configuration: Configuration,
-    syntaxHighlighter: ISyntaxHighlighter,
+    syntaxHighlighter: Oni.ISyntaxHighlighter,
 ): Epic<CompletionAction, ICompletionState> => (action$, store) =>
     action$
         .ofType("CURSOR_MOVED")
@@ -436,7 +435,7 @@ export const createStore = (
     configuration: Configuration,
     completionsRequestor: ICompletionsRequestor,
     snippetManager: SnippetManager,
-    syntaxHighlighter: ISyntaxHighlighter,
+    syntaxHighlighter: Oni.ISyntaxHighlighter,
 ): Store<ICompletionState> => {
     return oniCreateStore(
         "COMPLETION_STORE",
