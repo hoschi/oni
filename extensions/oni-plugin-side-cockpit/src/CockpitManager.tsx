@@ -59,7 +59,17 @@ export class CockpitManager implements Oni.IWindowSplit {
         await this.cockpitEditor.activeBuffer.setLines(evt.firstline, evt.lastline, evt.linedata)
         await this.cockpitEditor.neovim.input("z<CR>")
         if (evt.lastline - evt.firstline === 1 && evt.linedata.length === 1) {
-            // FIXME add method to SyntaxHighlighting.ts to just update one line in buffer
+            // WARNING this doesn't work, it updates the syntax but doesn't recognized the tokens right
+            //await this.cockpitEditor.syntaxHighlighter.updateLine(
+            //evt.linedata[0],
+            //evt.firstline,
+            //this.cockpitEditor.activeBuffer,
+            //)
+            const allLines = await this.cockpitEditor.activeBuffer.getLines()
+            await this.cockpitEditor.syntaxHighlighter.updateBuffer(
+                allLines,
+                this.cockpitEditor.activeBuffer,
+            )
         } else {
             const allLines = await this.cockpitEditor.activeBuffer.getLines()
             await this.cockpitEditor.syntaxHighlighter.updateBuffer(

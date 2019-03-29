@@ -119,7 +119,8 @@ export class SyntaxHighlighter implements Oni.ISyntaxHighlighter {
         }
     }
 
-    public async updateBuffer(lines: String[], buffer: Oni.Buffer): Promise<void> {
+    public async updateBuffer(lines: string[], buffer: Oni.Buffer): Promise<void> {
+        // reset buffer data, buffer.version is not updated and update would be ignored without this
         this._store.dispatch({ type: "SYNTAX_RESET_BUFFER", bufferId: buffer.id, lines })
         this._store.dispatch({
             type: "SYNTAX_UPDATE_BUFFER",
@@ -128,6 +129,16 @@ export class SyntaxHighlighter implements Oni.ISyntaxHighlighter {
             bufferId: buffer.id,
             lines,
             version: buffer.version,
+        })
+    }
+
+    public async updateLine(line: string, lineNumber: number, buffer: Oni.Buffer): Promise<void> {
+        this._throttledActions.next({
+            type: "SYNTAX_UPDATE_BUFFER_LINE_FORCED",
+            bufferId: buffer.id,
+            version: buffer.version,
+            lineNumber,
+            line,
         })
     }
 
@@ -188,6 +199,10 @@ export class NullSyntaxHighlighter implements Oni.ISyntaxHighlighter {
     }
 
     public async updateBuffer(lines: String[], buffer: Oni.Buffer): Promise<void> {
+        return Promise.resolve(null)
+    }
+
+    public async updateLine(line: string, lineNumber: number, buffer: Oni.Buffer): Promise<void> {
         return Promise.resolve(null)
     }
 

@@ -90,6 +90,13 @@ export type ISyntaxHighlightAction =
           version: number
       }
     | {
+          type: "SYNTAX_UPDATE_BUFFER_LINE_FORCED"
+          bufferId: string
+          lineNumber: number
+          line: string
+          version: number
+      }
+    | {
           type: "SYNTAX_UPDATE_TOKENS_FOR_LINE"
           bufferId: string
           lineNumber: number
@@ -120,7 +127,10 @@ const grammarLoader = new GrammarLoader()
 const updateBufferLineMiddleware = (store: any) => (next: any) => (action: any) => {
     const result: ISyntaxHighlightAction = next(action)
 
-    if (action.type === "SYNTAX_UPDATE_BUFFER_LINE") {
+    if (
+        action.type === "SYNTAX_UPDATE_BUFFER_LINE" ||
+        action.type === "SYNTAX_UPDATE_BUFFER_LINE_FORCED"
+    ) {
         const state: ISyntaxHighlightState = store.getState()
         const bufferId = action.bufferId
 
