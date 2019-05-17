@@ -10,10 +10,6 @@ export interface ICockpitEditorProps {
  */
 export class CockpitEditor extends React.PureComponent<ICockpitEditorProps, {}> {
     public render(): JSX.Element {
-        return (
-            <div style={{ border: "1px solid blue" }}>
-                <div style={{ width: 500, height: 800 }}>{this.props.editor.render()}</div>
-            </div>
-        )
+        return <div className="container full">{this.props.editor.render()}</div>
     }
 }

@@ -312,10 +312,12 @@ export class CockpitManager implements Oni.IWindowSplit {
     public render(): JSX.Element {
         return (
             <Provider store={this.store}>
-                <div>
+                <div className="container full vertical">
                     <h1>Cockpit</h1>
-                    <CockpitEditor editor={this.cockpitEditor} />
-                    <div className="enable-mouse">
+                    <div style={{ flex: 1 }}>
+                        <CockpitEditor editor={this.cockpitEditor} />
+                    </div>
+                    <div className="enable-mouse" style={{ marginBottom: 20 }}>
                         test:{" "}
                         <button
                             onClick={() => {
@@ -329,6 +331,8 @@ export class CockpitManager implements Oni.IWindowSplit {
                         >
                             click me
                         </button>
+                        <div>bottom</div>
+                        <div>area</div>
                     </div>
                 </div>
             </Provider>
