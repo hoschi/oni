@@ -1,7 +1,7 @@
 import * as Oni from "oni-api"
 import * as React from "react"
 import { Event } from "oni-types"
-import { find, hasIn } from "lodash"
+import { find, hasIn, omit } from "lodash"
 import { Provider } from "react-redux"
 import { Reducer, Store } from "redux"
 import { CockpitEditor } from "./CockpitEditor"
@@ -95,11 +95,20 @@ export class CockpitManager implements Oni.IWindowSplit {
         }
     }
 
-    private async onTabsUpdate(currentTabId: number): Promise<void> {
+    private async onTabsUpdate(evt: Oni.TabsUpdateEventArgs): Promise<void> {
+        const { currentTabId, deletedTabId } = evt
+
+        if (deletedTabId !== undefined) {
+            this.oni.log.info(`sc - deleted tab:${deletedTabId}`)
+            this.store.dispatch({
+                type: "REMOVE_TAB",
+                tabId: deletedTabId,
+            })
+        }
+
         const state = this.store.getState()
         this.oni.log.info(`sc - tabs update, current:${currentTabId}, before:${state.activeTabId}`)
         if (state.activeTabId === currentTabId) {
-            // TODO check if one tab was deleted, delete tab state as well, or listen explicetly for "tab close" event, probably easier
             return
         }
 
@@ -356,6 +365,10 @@ type CockpitManagerActions =
           currentTabId: number
       }
     | {
+          type: "REMOVE_TAB"
+          tabId: number
+      }
+    | {
           type: "SET_CURRENT_TAB_ID"
           currentTabId: number
       }
@@ -384,6 +397,11 @@ const cockpitManagerReducer: Reducer<ICockpitManagerState> = (
                     ...state.tabs,
                     [action.currentTabId]: new CockpitTab(action.currentTabId),
                 },
+            }
+        case "REMOVE_TAB":
+            return {
+                ...state,
+                tabs: omit(state.tabs, [action.tabId.toString()]),
             }
         case "SET_CURRENT_TAB_ID":
             return {

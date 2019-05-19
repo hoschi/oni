@@ -23,7 +23,7 @@ export abstract class Editor extends Disposable implements Oni.Editor {
     private _onBufferScrolledEvent = new Event<Oni.EditorBufferScrolledEventArgs>()
     private _onCursorMoved = new Event<Oni.Cursor>()
     private _onModeChangedEvent = new Event<Oni.Vim.Mode>()
-    private _onTabsUpdate = new Event<number>()
+    private _onTabsUpdate = new Event<Oni.TabsUpdateEventArgs>()
 
     public get mode(): string {
         return this._currentMode
@@ -65,7 +65,7 @@ export abstract class Editor extends Disposable implements Oni.Editor {
         return this._onBufferScrolledEvent
     }
 
-    public get onTabsUpdate(): IEvent<number> {
+    public get onTabsUpdate(): IEvent<Oni.TabsUpdateEventArgs> {
         return this._onTabsUpdate
     }
 
@@ -125,7 +125,7 @@ export abstract class Editor extends Disposable implements Oni.Editor {
         this._onBufferScrolledEvent.dispatch(bufferScrollEvent)
     }
 
-    protected notifyTabsUpdate(tabsUpdateEvent: number): void {
-        this._onTabsUpdate.dispatch(tabsUpdateEvent)
+    protected notifyTabsUpdate(evt: Oni.TabsUpdateEventArgs): void {
+        this._onTabsUpdate.dispatch(evt)
     }
 }

@@ -7,6 +7,8 @@
 import * as os from "os"
 import * as React from "react"
 
+import { remove } from "lodash"
+
 import "rxjs/add/observable/defer"
 import "rxjs/add/observable/merge"
 import "rxjs/add/operator/map"
@@ -566,18 +568,24 @@ export class NeovimEditor extends Editor implements Oni.Editor {
 
         // TODO: Add first class event for this
         this._neovimInstance.on("tabline-update", async (currentTabId: number, tabs: ITab[]) => {
+            let deletedTabIds = this._store.getState().tabState.tabs.map(tab => tab.id)
             const atomicCalls = tabs.map((tab: ITab) => {
                 return ["nvim_call_function", ["tabpagebuflist", [tab.id]]]
             })
 
             const response = await this._neovimInstance.request("nvim_call_atomic", [atomicCalls])
 
-            tabs.map((tab: ITab, index: number) => {
+            tabs.forEach((tab: ITab, index: number) => {
                 tab.buffersInTab = response[0][index] instanceof Array ? response[0][index] : []
+                remove(deletedTabIds, id => tab.id === id)
             })
 
             this._actions.setTabs(currentTabId, tabs)
-            this.notifyTabsUpdate(currentTabId)
+            let evt: Oni.TabsUpdateEventArgs = { currentTabId }
+            if (deletedTabIds.length > 0) {
+                evt.deletedTabId = deletedTabIds[0]
+            }
+            this.notifyTabsUpdate(evt)
         })
 
         // TODO: Does any disposal need to happen for the observables?

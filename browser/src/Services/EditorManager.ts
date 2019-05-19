@@ -104,7 +104,7 @@ class AnyEditorProxy implements Oni.Editor {
     private _onBufferSaved = new Event<Oni.EditorBufferSavedEventArgs>()
     private _onBufferScrolled = new Event<Oni.EditorBufferScrolledEventArgs>()
     private _onCursorMoved = new Event<Oni.Cursor>()
-    private _onTabsUpdate = new Event<number>()
+    private _onTabsUpdate = new Event<Oni.TabsUpdateEventArgs>()
 
     /**
      * API Methods
@@ -170,7 +170,7 @@ class AnyEditorProxy implements Oni.Editor {
         return this._onCursorMoved
     }
 
-    public get onTabsUpdate(): IEvent<number> {
+    public get onTabsUpdate(): IEvent<Oni.TabsUpdateEventArgs> {
         return this._onTabsUpdate
     }
 
