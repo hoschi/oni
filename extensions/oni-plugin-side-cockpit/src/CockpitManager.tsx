@@ -22,6 +22,7 @@ function isActiveBuffer(buffer: Oni.Buffer | Oni.InactiveBuffer): buffer is Oni.
 }
 
 export class CockpitManager implements Oni.IWindowSplit {
+    private _isSoftHidden: boolean = false
     private split: Oni.WindowSplitHandle
     private store: Store<ICockpitManagerState>
     private cockpitEditor: Oni.Editor
@@ -32,7 +33,7 @@ export class CockpitManager implements Oni.IWindowSplit {
         this.store = createStore(this.oni)
     }
 
-    public open(): void {
+    public init(): void {
         const editorSplit = this.oni.windows.activeSplitHandle
         this.split = this.oni.windows.createSplit("vertical", this)
         editorSplit.focus()
@@ -48,6 +49,35 @@ export class CockpitManager implements Oni.IWindowSplit {
 
         this.cockpitEditor = this.oni.neovimEditorFactory.createEditor()
         this.cockpitEditor.init([])
+    }
+
+    public toggle(): void {
+        if (this._isSoftHidden) {
+            this.show()
+        } else {
+            this.hide()
+        }
+    }
+
+    public show(): void {
+        if (this._isSoftHidden === false) {
+            return
+        }
+
+        this._isSoftHidden = false
+        this.oni.windows.updatePrimarySplits()
+    }
+
+    public hide(): void {
+        if (this._isSoftHidden) {
+            return
+        }
+        this._isSoftHidden = true
+        this.oni.windows.updatePrimarySplits()
+    }
+
+    public get isSoftHidden(): boolean {
+        return this._isSoftHidden
     }
 
     private async onBufLinesEvent(evt: Oni.IBufLinesEvent) {

@@ -27,6 +27,7 @@ import { createCompletablePromise, ICompletablePromise } from "./../../src/Utili
 import { TokenColor } from "./../../src/Services/TokenColors"
 
 export class MockWindowSplit {
+    public isSoftHidden: boolean = false
     public get id(): string {
         return this._id
     }

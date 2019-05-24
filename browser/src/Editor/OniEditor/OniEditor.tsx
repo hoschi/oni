@@ -64,6 +64,7 @@ const wrapReactComponentWithLayer = (id: string, component: JSX.Element): Oni.Bu
 }
 
 export class OniEditor extends Utility.Disposable implements Oni.Editor {
+    public isSoftHidden: boolean = false
     private _neovimEditor: NeovimEditor
 
     public get mode(): string {

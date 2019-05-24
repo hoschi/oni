@@ -11,8 +11,14 @@ export function activate(oni: any): any {
     const cockpitManager = new CockpitManager(oni)
 
     oni.commands.registerCommand(
-        new Command("sideCockpit.open", "Cockpit: Open", "Open Cockpit pane", () => {
-            cockpitManager.open()
+        new Command("sideCockpit.init", "Cockpit: Init", "Init Cockpit pane", () => {
+            cockpitManager.init()
+        }),
+    )
+
+    oni.commands.registerCommand(
+        new Command("sideCockpit.toggle", "Cockpit: Toggle", "Toggle Cockpit pane", () => {
+            cockpitManager.toggle()
         }),
     )
 
@@ -49,7 +55,7 @@ export function activate(oni: any): any {
         ),
     )
 
-    cockpitManager.open()
+    cockpitManager.init()
 
     return cockpitManager as any
 }

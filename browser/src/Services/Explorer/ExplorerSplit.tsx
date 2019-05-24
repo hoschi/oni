@@ -24,6 +24,7 @@ import { Explorer } from "./ExplorerView"
 type Node = ExplorerSelectors.ExplorerNode
 
 export class ExplorerSplit {
+    public isSoftHidden: boolean = false
     private _onEnterEvent: Event<void> = new Event<void>()
     private _selectedId: string = null
     private _store: Store<IExplorerState>

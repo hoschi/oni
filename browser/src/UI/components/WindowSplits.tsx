@@ -14,6 +14,7 @@ import {
     IAugmentedSplitInfo,
     ISplitInfo,
     layoutFromSplitInfo,
+    LayoutResultInfo,
     leftDockSelector,
     WindowManager,
     WindowState,
@@ -67,22 +68,23 @@ export interface IWindowSplitViewProps {
 const px = (num: number): string => num.toString() + "px"
 
 const rectangleToStyleProperties = (
-    rect: Oni.Shapes.Rectangle,
+    item: LayoutResultInfo,
     totalHeight: number,
 ): React.CSSProperties => {
     const halfPadding = 3
+    const { rectangle: rect, split } = item
     const topPosition = rect.y === 0 ? 0 : Math.ceil(rect.y) + halfPadding
 
     const bottomPadding = Math.ceil(rect.y + rect.height) >= totalHeight ? 0 : halfPadding * 2
     return {
-        position: "absolute",
+        position: split.isSoftHidden ? "fixed" : "absolute",
         top: px(topPosition),
         left: px(Math.ceil(rect.x) + halfPadding),
         width: px(Math.floor(rect.width) - halfPadding * 2),
         height: px(Math.floor(rect.height) - bottomPadding),
+        zIndex: split.isSoftHidden ? -1 : undefined,
     }
 }
-import * as Oni from "oni-api"
 
 export class WindowSplitView extends React.PureComponent<IWindowSplitViewProps, {}> {
     public render(): JSX.Element {
@@ -95,7 +97,7 @@ export class WindowSplitView extends React.PureComponent<IWindowSplitViewProps, 
                     {({ height, width }) => {
                         const items = layoutFromSplitInfo(this.props.split, width, height)
                         const vals: JSX.Element[] = Object.values(items).map(item => {
-                            const style = rectangleToStyleProperties(item.rectangle, height)
+                            const style = rectangleToStyleProperties(item, height)
                             return (
                                 <div style={style} key={item.split.id}>
                                     <WindowSplitHost

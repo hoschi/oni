@@ -12,6 +12,7 @@ import { SidebarManager } from "./SidebarStore"
 import { Sidebar } from "./SidebarView"
 
 export class SidebarSplit {
+    public isSoftHidden: boolean = false
     constructor(private _sidebarManager: SidebarManager) {}
 
     public enter(): void {

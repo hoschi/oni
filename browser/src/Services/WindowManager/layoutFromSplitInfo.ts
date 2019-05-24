@@ -43,13 +43,17 @@ const layoutFromSplitInfoHelper = (
         return {}
     }
 
+    const visibleSplitsCount = split.splits.filter(
+        split => split.type === "Split" || (split.type === "Leaf" && !split.contents.isSoftHidden),
+    ).length
+
     // Recursive case
     //
     // TODO: Handle specified sizes for the windows. We're just distributing the space evenly, currently.
     const splitWidth =
-        split.direction === "horizontal" ? rectangle.width / split.splits.length : rectangle.width
+        split.direction === "horizontal" ? rectangle.width / visibleSplitsCount : rectangle.width
     const splitHeight =
-        split.direction === "vertical" ? rectangle.height / split.splits.length : rectangle.height
+        split.direction === "vertical" ? rectangle.height / visibleSplitsCount : rectangle.height
 
     let ret = {}
 

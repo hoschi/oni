@@ -24,6 +24,7 @@ export const getActiveEntry = (state: ISidebarState): ISidebarEntry => {
  * Split that is the container for the active sidebar item
  */
 export class SidebarContentSplit {
+    public isSoftHidden: boolean = false
     private _onEnterEvent = new Event<void>()
     private _onLeaveEvent = new Event<void>()
 

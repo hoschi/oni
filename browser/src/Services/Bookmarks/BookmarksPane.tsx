@@ -20,6 +20,7 @@ import { SidebarContainerView, SidebarItemView } from "./../../UI/components/Sid
 import { VimNavigator } from "./../../UI/components/VimNavigator"
 
 export class BookmarksPane implements SidebarPane {
+    public isSoftHidden = false
     private _onEnter = new Event<void>()
     private _onLeave = new Event<void>()
 

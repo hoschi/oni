@@ -16,6 +16,7 @@ interface SessionPaneProps {
  *
  */
 export default class SessionsPane {
+    public isSoftHidden: boolean = false
     private _store: ISessionStore
     private _commands: Commands.Api
 
