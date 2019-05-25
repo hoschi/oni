@@ -19,6 +19,7 @@ export interface IDsMap {
 }
 
 export default class VersionControlPane {
+    public isSoftHidden: boolean = false
     public get id() {
         return "oni.sidebar.vcs"
     }

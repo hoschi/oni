@@ -14,6 +14,8 @@ export * from "./MockThemeLoader"
 import * as Oni from "oni-api"
 import { Event, IEvent } from "oni-types"
 
+import { Middleware, Reducer, Store } from "redux"
+
 import * as types from "vscode-languageserver-types"
 
 import { Editor } from "./../../src/Editor/Editor"
@@ -25,6 +27,7 @@ import { createCompletablePromise, ICompletablePromise } from "./../../src/Utili
 import { TokenColor } from "./../../src/Services/TokenColors"
 
 export class MockWindowSplit {
+    public isSoftHidden: boolean = false
     public get id(): string {
         return this._id
     }
@@ -324,6 +327,10 @@ export class MockOni implements Oni.Plugin.Api {
         throw Error("Not yet implemented")
     }
 
+    get neovimEditorFactory(): any /* TODO */ {
+        throw Error("Not yet implemented")
+    }
+
     get notifications(): Oni.Notifications.Api {
         throw Error("Not yet implemented")
     }
@@ -377,6 +384,15 @@ export class MockOni implements Oni.Plugin.Api {
     }
 
     public populateQuickFix(entries: Oni.QuickFixEntry[]): void {
+        throw Error("Not yet implemented")
+    }
+
+    public createReduxStore<TState>(
+        name: string,
+        reducer: Reducer<TState>,
+        defaultState: TState,
+        optionalMiddleware: Middleware[],
+    ): Store<TState> {
         throw Error("Not yet implemented")
     }
 }

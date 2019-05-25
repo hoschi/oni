@@ -52,6 +52,8 @@ export const bufferReducer: Reducer<IBufferSyntaxHighlightState> = (
 ) => {
     switch (action.type) {
         case "SYNTAX_RESET_BUFFER":
+        case "SYNTAX_UPDATE_TOKENS_FOR_LINE":
+        case "SYNTAX_UPDATE_BUFFER_LINE_FORCED":
             return {
                 ...state,
                 lines: linesReducer(state.lines, action),
@@ -70,11 +72,6 @@ export const bufferReducer: Reducer<IBufferSyntaxHighlightState> = (
                 ...state,
                 topVisibleLine: action.topVisibleLine,
                 bottomVisibleLine: action.bottomVisibleLine,
-            }
-        case "SYNTAX_UPDATE_TOKENS_FOR_LINE":
-            return {
-                ...state,
-                lines: linesReducer(state.lines, action),
             }
         case "SYNTAX_UPDATE_TOKENS_FOR_LINE_INSERT_MODE":
             return {
@@ -132,7 +129,8 @@ export const linesReducer: Reducer<SyntaxHighlightLines> = (
         }
         case "SYNTAX_RESET_BUFFER":
             const resetState = Object.entries(state).reduce<SyntaxHighlightLines>(
-                (newResetState, [lineNumber, line]) => {
+                (newResetState, [lineNumber, ourLine]) => {
+                    const line = action.lines ? action.lines[lineNumber] : ourLine
                     newResetState[lineNumber] = {
                         tokens: [],
                         ruleStack: null,
@@ -144,6 +142,17 @@ export const linesReducer: Reducer<SyntaxHighlightLines> = (
                 {},
             )
             return resetState
+
+        case "SYNTAX_UPDATE_BUFFER_LINE_FORCED": {
+            const updatedBufferLineForcedState: SyntaxHighlightLines = {
+                ...state,
+            }
+            updatedBufferLineForcedState[action.lineNumber] = {
+                ...updatedBufferLineForcedState[action.lineNumber],
+                line: action.line,
+            }
+            return updatedBufferLineForcedState
+        }
 
         case "SYNTAX_UPDATE_BUFFER":
             const updatedBufferState: SyntaxHighlightLines = {

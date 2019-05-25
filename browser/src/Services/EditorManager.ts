@@ -101,9 +101,10 @@ class AnyEditorProxy implements Oni.Editor {
     private _onBufferEnter = new Event<Oni.EditorBufferEventArgs>()
     private _onBufferLeave = new Event<Oni.EditorBufferEventArgs>()
     private _onBufferChanged = new Event<Oni.EditorBufferChangedEventArgs>()
-    private _onBufferSaved = new Event<Oni.EditorBufferEventArgs>()
+    private _onBufferSaved = new Event<Oni.EditorBufferSavedEventArgs>()
     private _onBufferScrolled = new Event<Oni.EditorBufferScrolledEventArgs>()
     private _onCursorMoved = new Event<Oni.Cursor>()
+    private _onTabsUpdate = new Event<Oni.TabsUpdateEventArgs>()
 
     /**
      * API Methods
@@ -157,7 +158,7 @@ class AnyEditorProxy implements Oni.Editor {
         return this._onBufferLeave
     }
 
-    public get onBufferSaved(): IEvent<Oni.EditorBufferEventArgs> {
+    public get onBufferSaved(): IEvent<Oni.EditorBufferSavedEventArgs> {
         return this._onBufferSaved
     }
 
@@ -167,6 +168,10 @@ class AnyEditorProxy implements Oni.Editor {
 
     public get onCursorMoved(): IEvent<Oni.Cursor> {
         return this._onCursorMoved
+    }
+
+    public get onTabsUpdate(): IEvent<Oni.TabsUpdateEventArgs> {
+        return this._onTabsUpdate
     }
 
     public dispose(): void {
@@ -228,6 +233,7 @@ class AnyEditorProxy implements Oni.Editor {
             newEditor.onBufferSaved.subscribe(val => this._onBufferSaved.dispatch(val)),
             newEditor.onBufferScrolled.subscribe(val => this._onBufferScrolled.dispatch(val)),
             newEditor.onCursorMoved.subscribe(val => this._onCursorMoved.dispatch(val)),
+            newEditor.onTabsUpdate.subscribe(val => this._onTabsUpdate.dispatch(val)),
         ]
     }
 

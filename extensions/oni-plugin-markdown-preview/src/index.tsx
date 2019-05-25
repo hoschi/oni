@@ -221,6 +221,7 @@ class MarkdownPreview extends React.PureComponent<IMarkdownPreviewProps, IMarkdo
 }
 
 class MarkdownPreviewEditor implements Oni.IWindowSplit {
+    public isSoftHidden: boolean = false
     private _open: boolean = false
     private _manuallyClosed: boolean = false
     private _unrenderedContent: string = ""

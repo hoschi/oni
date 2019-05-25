@@ -19,10 +19,11 @@ export abstract class Editor extends Disposable implements Oni.Editor {
     private _onBufferEnterEvent = new Event<Oni.EditorBufferEventArgs>()
     private _onBufferLeaveEvent = new Event<Oni.EditorBufferEventArgs>()
     private _onBufferChangedEvent = new Event<Oni.EditorBufferChangedEventArgs>()
-    private _onBufferSavedEvent = new Event<Oni.EditorBufferEventArgs>()
+    private _onBufferSavedEvent = new Event<Oni.EditorBufferSavedEventArgs>()
     private _onBufferScrolledEvent = new Event<Oni.EditorBufferScrolledEventArgs>()
     private _onCursorMoved = new Event<Oni.Cursor>()
     private _onModeChangedEvent = new Event<Oni.Vim.Mode>()
+    private _onTabsUpdate = new Event<Oni.TabsUpdateEventArgs>()
 
     public get mode(): string {
         return this._currentMode
@@ -56,12 +57,16 @@ export abstract class Editor extends Disposable implements Oni.Editor {
         return this._onBufferChangedEvent
     }
 
-    public get onBufferSaved(): IEvent<Oni.EditorBufferEventArgs> {
+    public get onBufferSaved(): IEvent<Oni.EditorBufferSavedEventArgs> {
         return this._onBufferSavedEvent
     }
 
     public get onBufferScrolled(): IEvent<Oni.EditorBufferScrolledEventArgs> {
         return this._onBufferScrolledEvent
+    }
+
+    public get onTabsUpdate(): IEvent<Oni.TabsUpdateEventArgs> {
+        return this._onTabsUpdate
     }
 
     public getBuffers(): Array<Oni.Buffer | Oni.InactiveBuffer> {
@@ -112,11 +117,15 @@ export abstract class Editor extends Disposable implements Oni.Editor {
         this._onBufferLeaveEvent.dispatch(bufferEvent)
     }
 
-    protected notifyBufferSaved(bufferEvent: Oni.EditorBufferEventArgs): void {
+    protected notifyBufferSaved(bufferEvent: Oni.EditorBufferSavedEventArgs): void {
         this._onBufferSavedEvent.dispatch(bufferEvent)
     }
 
     protected notifyBufferScrolled(bufferScrollEvent: Oni.EditorBufferScrolledEventArgs): void {
         this._onBufferScrolledEvent.dispatch(bufferScrollEvent)
+    }
+
+    protected notifyTabsUpdate(evt: Oni.TabsUpdateEventArgs): void {
+        this._onTabsUpdate.dispatch(evt)
     }
 }

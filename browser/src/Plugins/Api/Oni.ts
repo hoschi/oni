@@ -9,6 +9,7 @@ import * as ChildProcess from "child_process"
 
 import * as OniApi from "oni-api"
 import * as Log from "oni-core-logging"
+import { Middleware, Reducer, Store } from "redux"
 
 import Process from "./Process"
 import { Services } from "./Services"
@@ -29,6 +30,7 @@ import { getTutorialManagerInstance } from "./../../Services/Learning"
 import { getInstance as getAchievementsInstance } from "./../../Services/Learning/Achievements"
 import { getInstance as getMenuManagerInstance } from "./../../Services/Menu"
 import { getInstance as getFiltersInstance } from "./../../Services/Menu/Filter"
+import { getInstance as getNeovimEditorFactory } from "./../../Services/NeovimEditorFactory"
 import { getInstance as getNotificationsInstance } from "./../../Services/Notifications"
 import { getInstance as getOverlayInstance } from "./../../Services/Overlay"
 import { recorder } from "./../../Services/Recorder"
@@ -42,6 +44,8 @@ import { windowManager } from "./../../Services/WindowManager"
 import { getInstance as getWorkspaceInstance } from "./../../Services/Workspace"
 
 import { Search } from "./../../Services/Search/SearchProvider"
+
+import { createStore as createReduxStoreOrig } from "./../../Redux"
 
 import * as throttle from "lodash/throttle"
 
@@ -149,6 +153,10 @@ export class Oni implements OniApi.Plugin.Api {
         return getSidebarInstance()
     }
 
+    public get neovimEditorFactory(): any {
+        return getNeovimEditorFactory()
+    }
+
     public get sneak(): any {
         return getSneakInstance()
     }
@@ -254,5 +262,14 @@ export class Oni implements OniApi.Plugin.Api {
         )
 
         return Process.spawnNodeScript(scriptPath, args, options)
+    }
+
+    public createReduxStore<TState>(
+        name: string,
+        reducer: Reducer<TState>,
+        defaultState: TState,
+        optionalMiddleware: Middleware[],
+    ): Store<TState> {
+        return createReduxStoreOrig(name, reducer, defaultState, optionalMiddleware)
     }
 }

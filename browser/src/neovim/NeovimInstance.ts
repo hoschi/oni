@@ -248,6 +248,8 @@ export class NeovimInstance extends EventEmitter implements INeovimInstance {
 
     private _onCommandLineShowEvent = new Event<INeovimCommandLineShowEvent>()
     private _onCommandLineHideEvent = new Event<void>()
+    private _onBufLinesEvent = new Event<Oni.IBufLinesEvent>()
+    private _onBufDetachEvent = new Event<string>()
     private _onCommandLineSetCursorPositionEvent = new Event<INeovimCommandLineSetCursorPosition>()
     private _onVimEvent = new Event<INeovimEvent>()
     private _onWildMenuHideEvent = new Event<void>()
@@ -330,6 +332,14 @@ export class NeovimInstance extends EventEmitter implements INeovimInstance {
 
     public get onCommandLineHide(): IEvent<void> {
         return this._onCommandLineHideEvent
+    }
+
+    public get onBufLinesEvent(): IEvent<Oni.IBufLinesEvent> {
+        return this._onBufLinesEvent
+    }
+
+    public get onBufDetachEvent(): IEvent<string> {
+        return this._onBufDetachEvent
     }
 
     public get onCommandLineSetCursorPosition(): IEvent<INeovimCommandLineSetCursorPosition> {
@@ -951,6 +961,18 @@ export class NeovimInstance extends EventEmitter implements INeovimInstance {
         if (method === "redraw") {
             this._handleNotification(method, args)
             this._onRedrawComplete.dispatch()
+        } else if (method === "nvim_buf_lines_event") {
+            const [bufRef, changedtick, firstline, lastline, linedata, more] = args
+            this._onBufLinesEvent.dispatch({
+                buf: bufRef.id,
+                changedtick,
+                firstline,
+                lastline,
+                linedata,
+                more,
+            })
+        } else if (method === "nvim_buf_detach_event") {
+            this._onBufDetachEvent.dispatch(args[0].id.toString())
         } else if (method === "oni_plugin_notify") {
             const pluginArgs = args[0]
             const pluginMethod = pluginArgs.shift()

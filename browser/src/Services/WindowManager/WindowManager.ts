@@ -88,6 +88,10 @@ export class AugmentedWindow implements IAugmentedSplitInfo {
         return this._innerSplit
     }
 
+    public get isSoftHidden(): boolean {
+        return this._innerSplit.isSoftHidden
+    }
+
     public render(): JSX.Element {
         return this._innerSplit.render()
     }
@@ -216,6 +220,15 @@ export class WindowManager {
         }
 
         return new WindowSplitHandle(this._store, this, windowId)
+    }
+
+    public updatePrimarySplits(): void {
+        const newState = this._primarySplit.getState() as ISplitInfo<Oni.IWindowSplit>
+
+        this._store.dispatch({
+            type: "SET_PRIMARY_SPLITS",
+            splits: newState,
+        })
     }
 
     public getSplitHandle(split: Oni.IWindowSplit): WindowSplitHandle {

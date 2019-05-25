@@ -7,6 +7,8 @@
 import * as os from "os"
 import * as React from "react"
 
+import { remove } from "lodash"
+
 import "rxjs/add/observable/defer"
 import "rxjs/add/observable/merge"
 import "rxjs/add/operator/map"
@@ -56,11 +58,7 @@ import {
     LanguageManager,
 } from "./../../Services/Language"
 
-import {
-    ISyntaxHighlighter,
-    NullSyntaxHighlighter,
-    SyntaxHighlighter,
-} from "./../../Services/SyntaxHighlighting"
+import { NullSyntaxHighlighter, SyntaxHighlighter } from "./../../Services/SyntaxHighlighting"
 
 import { MenuManager } from "./../../Services/Menu"
 import { IThemeMetadata, ThemeManager } from "./../../Services/Themes"
@@ -132,7 +130,7 @@ export class NeovimEditor extends Editor implements Oni.Editor {
     private _lastBufferId: string = null
 
     private _typingPredictionManager: TypingPredictionManager = new TypingPredictionManager()
-    private _syntaxHighlighter: ISyntaxHighlighter
+    private _syntaxHighlighter: Oni.ISyntaxHighlighter
     private _languageIntegration: LanguageEditorIntegration
     private _completion: Completion
     private _hoverRenderer: HoverRenderer
@@ -182,7 +180,7 @@ export class NeovimEditor extends Editor implements Oni.Editor {
         this._autoFocus = val
     }
 
-    public get syntaxHighlighter(): ISyntaxHighlighter {
+    public get syntaxHighlighter(): Oni.ISyntaxHighlighter {
         return this._syntaxHighlighter
     }
 
@@ -570,17 +568,24 @@ export class NeovimEditor extends Editor implements Oni.Editor {
 
         // TODO: Add first class event for this
         this._neovimInstance.on("tabline-update", async (currentTabId: number, tabs: ITab[]) => {
+            const deletedTabIds = this._store.getState().tabState.tabs.map(tab => tab.id)
             const atomicCalls = tabs.map((tab: ITab) => {
                 return ["nvim_call_function", ["tabpagebuflist", [tab.id]]]
             })
 
             const response = await this._neovimInstance.request("nvim_call_atomic", [atomicCalls])
 
-            tabs.map((tab: ITab, index: number) => {
+            tabs.forEach((tab: ITab, index: number) => {
                 tab.buffersInTab = response[0][index] instanceof Array ? response[0][index] : []
+                remove(deletedTabIds, id => tab.id === id)
             })
 
             this._actions.setTabs(currentTabId, tabs)
+            const evt: Oni.TabsUpdateEventArgs = { currentTabId }
+            if (deletedTabIds.length > 0) {
+                evt.deletedTabId = deletedTabIds[0]
+            }
+            this.notifyTabsUpdate(evt)
         })
 
         // TODO: Does any disposal need to happen for the observables?
@@ -1208,6 +1213,8 @@ export class NeovimEditor extends Editor implements Oni.Editor {
         const lastBuffer = this.activeBuffer
         if (lastBuffer && lastBuffer.filePath !== buf.filePath) {
             this.notifyBufferLeave({
+                id: lastBuffer.id,
+                modified: lastBuffer.modified,
                 filePath: lastBuffer.filePath,
                 language: lastBuffer.language,
             })
@@ -1243,6 +1250,7 @@ export class NeovimEditor extends Editor implements Oni.Editor {
         this._actions.bufferSave(evt.bufferNumber, evt.modified, evt.version)
 
         this.notifyBufferSaved({
+            id: evt.bufferNumber.toString(),
             filePath: evt.bufferFullPath,
             language: evt.filetype,
         })

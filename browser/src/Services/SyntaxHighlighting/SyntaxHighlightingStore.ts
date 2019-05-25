@@ -8,6 +8,7 @@ import { Store } from "redux"
 import * as types from "vscode-languageserver-types"
 import { StackElement } from "vscode-textmate"
 
+import * as Oni from "oni-api"
 import * as Log from "oni-core-logging"
 
 import * as PeriodicJobs from "./../../PeriodicJobs"
@@ -21,15 +22,10 @@ import * as Selectors from "./SyntaxHighlightSelectors"
 
 const syntaxHighlightingJobs = new PeriodicJobs.PeriodicJobManager()
 
-export interface ISyntaxHighlightTokenInfo {
-    scopes: string[]
-    range: types.Range
-}
-
 export interface ISyntaxHighlightLineInfo {
     line: string
     ruleStack: StackElement
-    tokens: ISyntaxHighlightTokenInfo[]
+    tokens: Oni.ISyntaxHighlightTokenInfo[]
     dirty: boolean
 
     // The last version of the line that was 'tokenized'
@@ -76,6 +72,7 @@ export type ISyntaxHighlightAction =
     | {
           type: "SYNTAX_RESET_BUFFER"
           bufferId: string
+          lines: string[]
       }
     | {
           type: "SYNTAX_UPDATE_BUFFER"
@@ -93,10 +90,17 @@ export type ISyntaxHighlightAction =
           version: number
       }
     | {
+          type: "SYNTAX_UPDATE_BUFFER_LINE_FORCED"
+          bufferId: string
+          lineNumber: number
+          line: string
+          version: number
+      }
+    | {
           type: "SYNTAX_UPDATE_TOKENS_FOR_LINE"
           bufferId: string
           lineNumber: number
-          tokens: ISyntaxHighlightTokenInfo[]
+          tokens: Oni.ISyntaxHighlightTokenInfo[]
           ruleStack: StackElement
           version: number
       }
@@ -105,7 +109,7 @@ export type ISyntaxHighlightAction =
           bufferId: string
           line: string
           lineNumber: number
-          tokens: ISyntaxHighlightTokenInfo[]
+          tokens: Oni.ISyntaxHighlightTokenInfo[]
           ruleStack: StackElement
           version: number
       }
@@ -123,7 +127,10 @@ const grammarLoader = new GrammarLoader()
 const updateBufferLineMiddleware = (store: any) => (next: any) => (action: any) => {
     const result: ISyntaxHighlightAction = next(action)
 
-    if (action.type === "SYNTAX_UPDATE_BUFFER_LINE") {
+    if (
+        action.type === "SYNTAX_UPDATE_BUFFER_LINE" ||
+        action.type === "SYNTAX_UPDATE_BUFFER_LINE_FORCED"
+    ) {
         const state: ISyntaxHighlightState = store.getState()
         const bufferId = action.bufferId
 

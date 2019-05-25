@@ -35,7 +35,6 @@ import { MenuManager } from "./../../Services/Menu"
 import { OverlayManager } from "./../../Services/Overlay"
 
 import { SnippetManager } from "./../../Services/Snippets"
-import { ISyntaxHighlighter } from "./../../Services/SyntaxHighlighting"
 
 import { ThemeManager } from "./../../Services/Themes"
 import { TokenColors } from "./../../Services/TokenColors"
@@ -65,6 +64,7 @@ const wrapReactComponentWithLayer = (id: string, component: JSX.Element): Oni.Bu
 }
 
 export class OniEditor extends Utility.Disposable implements Oni.Editor {
+    public isSoftHidden: boolean = false
     private _neovimEditor: NeovimEditor
 
     public get mode(): string {
@@ -91,12 +91,16 @@ export class OniEditor extends Utility.Disposable implements Oni.Editor {
         return this._neovimEditor.onBufferChanged
     }
 
-    public get onBufferSaved(): IEvent<Oni.EditorBufferEventArgs> {
+    public get onBufferSaved(): IEvent<Oni.EditorBufferSavedEventArgs> {
         return this._neovimEditor.onBufferSaved
     }
 
     public get onBufferScrolled(): IEvent<Oni.EditorBufferScrolledEventArgs> {
         return this._neovimEditor.onBufferScrolled
+    }
+
+    public get onTabsUpdate(): IEvent<Oni.TabsUpdateEventArgs> {
+        return this._neovimEditor.onTabsUpdate
     }
 
     public get /* override */ activeBuffer(): Oni.Buffer {
@@ -110,10 +114,6 @@ export class OniEditor extends Utility.Disposable implements Oni.Editor {
     // Capabilities
     public get neovim(): Oni.NeovimEditorCapability {
         return this._neovimEditor.neovim
-    }
-
-    public get syntaxHighlighter(): ISyntaxHighlighter {
-        return this._neovimEditor.syntaxHighlighter
     }
 
     constructor(

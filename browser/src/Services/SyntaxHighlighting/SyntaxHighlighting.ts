@@ -24,10 +24,8 @@ import {
     createSyntaxHighlightStore,
     ISyntaxHighlightAction,
     ISyntaxHighlightState,
-    ISyntaxHighlightTokenInfo,
 } from "./SyntaxHighlightingStore"
 
-import { ISyntaxHighlighter } from "./ISyntaxHighlighter"
 import {
     IEditorWithSyntaxHighlighter,
     SyntaxHighlightReconciler,
@@ -36,7 +34,7 @@ import { getLineFromBuffer } from "./SyntaxHighlightSelectors"
 
 import * as Utility from "./../../Utility"
 
-export class SyntaxHighlighter implements ISyntaxHighlighter {
+export class SyntaxHighlighter implements Oni.ISyntaxHighlighter {
     private _store: Store<ISyntaxHighlightState>
     private _reconciler: SyntaxHighlightReconciler
     private _unsubscribe: Unsubscribe
@@ -69,7 +67,7 @@ export class SyntaxHighlighter implements ISyntaxHighlighter {
     ): void {
         Log.verbose(
             `[SyntaxHighlighting.notifyViewportChanged] -
-             bufferId: ${bufferId} 
+             bufferId: ${bufferId}
              topLineInView: ${topLineInView}
              bottomLineInView:  ${bottomLineInView}`,
         )
@@ -121,10 +119,33 @@ export class SyntaxHighlighter implements ISyntaxHighlighter {
         }
     }
 
+    public async updateBuffer(lines: string[], buffer: Oni.Buffer): Promise<void> {
+        // reset buffer data, buffer.version is not updated and update would be ignored without this
+        this._store.dispatch({ type: "SYNTAX_RESET_BUFFER", bufferId: buffer.id, lines })
+        this._store.dispatch({
+            type: "SYNTAX_UPDATE_BUFFER",
+            extension: path.extname(buffer.filePath),
+            language: buffer.language,
+            bufferId: buffer.id,
+            lines,
+            version: buffer.version,
+        })
+    }
+
+    public async updateLine(line: string, lineNumber: number, buffer: Oni.Buffer): Promise<void> {
+        this._throttledActions.next({
+            type: "SYNTAX_UPDATE_BUFFER_LINE_FORCED",
+            bufferId: buffer.id,
+            version: buffer.version,
+            lineNumber,
+            line,
+        })
+    }
+
     public getHighlightTokenAt(
         bufferId: string,
         position: types.Position,
-    ): ISyntaxHighlightTokenInfo {
+    ): Oni.ISyntaxHighlightTokenInfo {
         const state = this._store.getState()
         const buffer = state.bufferToHighlights[bufferId]
 
@@ -153,7 +174,7 @@ export class SyntaxHighlighter implements ISyntaxHighlighter {
     }
 }
 
-export class NullSyntaxHighlighter implements ISyntaxHighlighter {
+export class NullSyntaxHighlighter implements Oni.ISyntaxHighlighter {
     public notifyBufferUpdate(evt: Oni.EditorBufferChangedEventArgs): Promise<void> {
         return Promise.resolve(null)
     }
@@ -161,7 +182,7 @@ export class NullSyntaxHighlighter implements ISyntaxHighlighter {
     public getHighlightTokenAt(
         bufferId: string,
         position: types.Position,
-    ): ISyntaxHighlightTokenInfo {
+    ): Oni.ISyntaxHighlightTokenInfo {
         return null
     }
 
@@ -175,6 +196,14 @@ export class NullSyntaxHighlighter implements ISyntaxHighlighter {
         bottomLineInView: number,
     ): void {
         // tslint: disable-line
+    }
+
+    public async updateBuffer(lines: string[], buffer: Oni.Buffer): Promise<void> {
+        return Promise.resolve(null)
+    }
+
+    public async updateLine(line: string, lineNumber: number, buffer: Oni.Buffer): Promise<void> {
+        return Promise.resolve(null)
     }
 
     public dispose(): void {} // tslint:disable-line
