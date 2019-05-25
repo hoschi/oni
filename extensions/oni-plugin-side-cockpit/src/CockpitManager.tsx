@@ -9,7 +9,7 @@ import { CockpitEditor } from "./CockpitEditor"
 export class CockpitTab {
     public bufferId: string | null
     public topLine: number | null
-    constructor(public tabId: number) {}
+    constructor(public tabId: number, public isHidden: boolean) {}
 }
 
 export interface ICockpitManagerState {
@@ -22,7 +22,6 @@ function isActiveBuffer(buffer: Oni.Buffer | Oni.InactiveBuffer): buffer is Oni.
 }
 
 export class CockpitManager implements Oni.IWindowSplit {
-    private _isSoftHidden: boolean = false
     private split: Oni.WindowSplitHandle
     private store: Store<ICockpitManagerState>
     private cockpitEditor: Oni.Editor
@@ -52,7 +51,7 @@ export class CockpitManager implements Oni.IWindowSplit {
     }
 
     public toggle(): void {
-        if (this._isSoftHidden) {
+        if (this.isSoftHidden) {
             this.show()
         } else {
             this.hide()
@@ -60,24 +59,30 @@ export class CockpitManager implements Oni.IWindowSplit {
     }
 
     public show(): void {
-        if (this._isSoftHidden === false) {
+        if (this.isSoftHidden === false) {
             return
         }
 
-        this._isSoftHidden = false
+        this.store.dispatch({
+            type: "SET_HIDDEN",
+            isHidden: false,
+        })
         this.oni.windows.updatePrimarySplits()
     }
 
     public hide(): void {
-        if (this._isSoftHidden) {
+        if (this.isSoftHidden) {
             return
         }
-        this._isSoftHidden = true
+        this.store.dispatch({
+            type: "SET_HIDDEN",
+            isHidden: true,
+        })
         this.oni.windows.updatePrimarySplits()
     }
 
     public get isSoftHidden(): boolean {
-        return this._isSoftHidden
+        return this.getActiveTabState().isHidden
     }
 
     private async onBufLinesEvent(evt: Oni.IBufLinesEvent) {
@@ -142,11 +147,12 @@ export class CockpitManager implements Oni.IWindowSplit {
             return
         }
 
+        const lastTab = this.getActiveTabState()
         this.store.dispatch({
             type: "SET_CURRENT_TAB_ID",
             currentTabId,
         })
-        const activeTab = this.getActiveTabState()
+        let activeTab = this.getActiveTabState()
         if (activeTab) {
             if (activeTab.bufferId) {
                 await this.replaceCockpitBuffer(activeTab.bufferId)
@@ -159,6 +165,10 @@ export class CockpitManager implements Oni.IWindowSplit {
                 currentTabId,
             })
             await this.emptyCockpitEditor()
+            activeTab = this.getActiveTabState()
+        }
+        if (lastTab.isHidden !== activeTab.isHidden) {
+            this.oni.windows.updatePrimarySplits()
         }
     }
 
@@ -380,8 +390,10 @@ export class CockpitManager implements Oni.IWindowSplit {
 }
 
 const DefaultCockpitManagerState: ICockpitManagerState = {
-    activeTabId: null,
-    tabs: {},
+    activeTabId: 1,
+    tabs: {
+        1: new CockpitTab(1, true),
+    },
 }
 
 type CockpitManagerActions =
@@ -402,6 +414,10 @@ type CockpitManagerActions =
           type: "SET_CURRENT_TAB_ID"
           currentTabId: number
       }
+    | {
+          type: "SET_HIDDEN"
+          isHidden: boolean
+      }
 
 const cockpitManagerReducer: Reducer<ICockpitManagerState> = (
     state: ICockpitManagerState = DefaultCockpitManagerState,
@@ -420,12 +436,23 @@ const cockpitManagerReducer: Reducer<ICockpitManagerState> = (
                     },
                 },
             }
+        case "SET_HIDDEN":
+            return {
+                ...state,
+                tabs: {
+                    ...state.tabs,
+                    [state.activeTabId]: {
+                        ...state.tabs[state.activeTabId],
+                        isHidden: action.isHidden,
+                    },
+                },
+            }
         case "ADD_TAB":
             return {
                 ...state,
                 tabs: {
                     ...state.tabs,
-                    [action.currentTabId]: new CockpitTab(action.currentTabId),
+                    [action.currentTabId]: new CockpitTab(action.currentTabId, true),
                 },
             }
         case "REMOVE_TAB":

@@ -28,6 +28,7 @@ export function activate(oni: any): any {
             "Cockpit: Push to Cockpit",
             "Push current buffer to Cockpit",
             () => {
+                cockpitManager.show()
                 cockpitManager.pushToCockpit()
             },
         ),
@@ -39,6 +40,7 @@ export function activate(oni: any): any {
             "Cockpit: Push to Editor",
             "Push current cockpit buffer to Editor",
             () => {
+                cockpitManager.show()
                 cockpitManager.pushToEditor()
             },
         ),
@@ -50,6 +52,7 @@ export function activate(oni: any): any {
             "Cockpit: Swap Editors",
             "Swap sides so user can edit left or right",
             () => {
+                cockpitManager.show()
                 cockpitManager.swapEditors()
             },
         ),
