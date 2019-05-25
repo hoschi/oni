@@ -7743,9 +7743,9 @@ onetime@^2.0.0:
   dependencies:
     mimic-fn "^1.0.0"
 
-oni-api@hoschi/oni-api#cockpit:
+oni-api@hoschi/oni-api#master:
   version "0.0.50"
-  resolved "https://codeload.github.com/hoschi/oni-api/tar.gz/3ee8e6b46e8533d0337375156d255579b493b8e7"
+  resolved "https://codeload.github.com/hoschi/oni-api/tar.gz/f9c106ff38e67096052dab1cd49ba21741db075d"
 
 oni-core-logging@^1.0.0:
   version "1.0.0"
