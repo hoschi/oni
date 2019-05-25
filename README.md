@@ -3,6 +3,10 @@
     <h3 align="center">Modern Modal Editing</h3>
 </p>
 
+---
+> :construction: __NOTE:__ We're now shifting our focus to building [Oni 2](https://github.com/onivim/oni2) :construction_worker_man: :construction_worker_woman:
+---
+
 <p align="center">
 	<a href="https://travis-ci.org/onivim/oni">
 		<img src="https://travis-ci.org/onivim/oni.svg?branch=master" alt="Build Status">
@@ -19,55 +23,9 @@
 	<a href="https://discord.gg/7maEAxV">
 		<img src="https://img.shields.io/discord/417774914645262338.svg" alt="Join the chat on discord!">
 	</a>
-	<a href="https://opencollective.com/oni#backer">
-		<img src="https://opencollective.com/oni/backers/badge.svg" alt="Backers on Open Collective">
-	</a>
-	<a href="https://www.bountysource.com/teams/oni">
-		<img src="https://api.bountysource.com/badge/tracker?tracker_id=48462304" alt="BountySource Active Bounties">
-	</a>
 	<a href="https://github.com/onivim/oni/releases">
 		<img src="https://img.shields.io/github/downloads/onivim/oni/total.svg" alt="Total Downloads">
 	</a>
-</p>
-
-<h2 align="center">Supporting Oni</h2>
-
-Oni is an independent, MIT-licensed open source project. Please consider supporting Oni by:
-
-*   [Become a backer or sponsor on Patreon](https://www.patreon.com/onivim)
-*   [Become a backer or sponsor on Open Collective](https://opencollective.com/oni)
-*   [Become a backer on BountySource](https://www.bountysource.com/teams/oni)
-
-<h3 align="center">Sponsors via OpenCollective</h3>
-
-<h4 align="center">Gold sponsors</h4>
-
-<p align="center">
-<a href="https://opencollective.com/oni/tiers/gold-sponsor/0/website" target="_blank"><img src="https://opencollective.com/oni/tiers/gold-sponsor/0/avatar.png"></a>
-<a href="https://opencollective.com/oni/tiers/gold-sponsor/1/website" target="_blank"><img src="https://opencollective.com/oni/tiers/gold-sponsor/1/avatar.png"></a>
-<a href="https://opencollective.com/oni/tiers/gold-sponsor/2/website" target="_blank"><img src="https://opencollective.com/oni/tiers/gold-sponsor/2/avatar.png"></a>
-<a href="https://opencollective.com/oni/tiers/gold-sponsor/3/website" target="_blank"><img src="https://opencollective.com/oni/tiers/gold-sponsor/3/avatar.png"></a>
-<a href="https://opencollective.com/oni/tiers/gold-sponsor/4/website" target="_blank"><img src="https://opencollective.com/oni/tiers/gold-sponsor/4/avatar.png"></a>
-<a href="https://opencollective.com/oni/tiers/gold-sponsor/5/website" target="_blank"><img src="https://opencollective.com/oni/tiers/gold-sponsor/5/avatar.png"></a>
-<a href="https://opencollective.com/oni/tiers/gold-sponsor/6/website" target="_blank"><img src="https://opencollective.com/oni/tiers/gold-sponsor/6/avatar.png"></a>
-<a href="https://opencollective.com/oni/tiers/gold-sponsor/7/website" target="_blank"><img src="https://opencollective.com/oni/tiers/gold-sponsor/7/avatar.png"></a>
-<a href="https://opencollective.com/oni/tiers/gold-sponsor/8/website" target="_blank"><img src="https://opencollective.com/oni/tiers/gold-sponsor/8/avatar.png"></a>
-<a href="https://opencollective.com/oni/tiers/gold-sponsor/9/website" target="_blank"><img src="https://opencollective.com/oni/tiers/gold-sponsor/9/avatar.png"></a>
-</p>
-
-<h4 align="center">Silver sponsors</h4>
-
-<p align="center">
-<a href="https://opencollective.com/oni/tiers/silver-sponsor/0/website" target="_blank"><img src="https://opencollective.com/oni/tiers/silver-sponsor/0/avatar.png"></a>
-<a href="https://opencollective.com/oni/tiers/silver-sponsor/1/website" target="_blank"><img src="https://opencollective.com/oni/tiers/silver-sponsor/1/avatar.png"></a>
-<a href="https://opencollective.com/oni/tiers/silver-sponsor/2/website" target="_blank"><img src="https://opencollective.com/oni/tiers/silver-sponsor/2/avatar.png"></a>
-<a href="https://opencollective.com/oni/tiers/silver-sponsor/3/website" target="_blank"><img src="https://opencollective.com/oni/tiers/silver-sponsor/3/avatar.png"></a>
-<a href="https://opencollective.com/oni/tiers/silver-sponsor/4/website" target="_blank"><img src="https://opencollective.com/oni/tiers/silver-sponsor/4/avatar.png"></a>
-<a href="https://opencollective.com/oni/tiers/silver-sponsor/5/website" target="_blank"><img src="https://opencollective.com/oni/tiers/silver-sponsor/5/avatar.png"></a>
-<a href="https://opencollective.com/oni/tiers/silver-sponsor/6/website" target="_blank"><img src="https://opencollective.com/oni/tiers/silver-sponsor/6/avatar.png"></a>
-<a href="https://opencollective.com/oni/tiers/silver-sponsor/7/website" target="_blank"><img src="https://opencollective.com/oni/tiers/silver-sponsor/7/avatar.png"></a>
-<a href="https://opencollective.com/oni/tiers/silver-sponsor/8/website" target="_blank"><img src="https://opencollective.com/oni/tiers/silver-sponsor/8/avatar.png"></a>
-<a href="https://opencollective.com/oni/tiers/silver-sponsor/9/website" target="_blank"><img src="https://opencollective.com/oni/tiers/silver-sponsor/9/avatar.png"></a>
 </p>
 
 ## Introduction
@@ -149,10 +107,6 @@ plugin to this list please create a PR updating this **README** with the details
 
 There many ways to get involved & contribute to Oni:
 
-*   Support Oni financially by making a donation via:
-    *   [Patreon](https://patreon.com/onivim)
-    *   [OpenCollective](https://opencollective.com/oni)
-    *   [Bountysource](https://salt.bountysource.com/teams/oni)
 *   Thumbs up existing [issues](https://github.com/onivim/oni/issues) if they impact you.
 *   [Create an issue](https://github.com/onivim/oni/issues) for bugs or new features.
 *   Review and update our [documentation](https://github.com/onivim/oni/wiki).
