@@ -1,5 +1,5 @@
-import * as React from "react"
 import * as Oni from "oni-api"
+import * as React from "react"
 
 export interface ICockpitEditorProps {
     editor: Oni.Editor

@@ -1,6 +1,8 @@
 import { NeovimEditor } from "./../Editor/NeovimEditor"
-import { configuration, Configuration } from "./Configuration"
 import * as PluginManager from "./../Plugins/PluginManager"
+
+import { configuration, Configuration } from "./Configuration"
+
 import * as Colors from "./Colors"
 import * as Completion from "./Completion"
 import * as Diagnostics from "./Diagnostics"

@@ -70,9 +70,9 @@ export class PluginSidebarItemView extends React.PureComponent<PluginSidebarItem
 }
 
 export class PluginsSidebarPane implements SidebarPane {
+    public isSoftHidden = false
     private _onEnter = new Event<void>()
     private _onLeave = new Event<void>()
-    public isSoftHidden = false
 
     public get id(): string {
         return "oni.sidebar.plugins"

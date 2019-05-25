@@ -1,9 +1,10 @@
-import * as Oni from "oni-api"
-import * as React from "react"
-import { Event } from "oni-types"
 import { find, hasIn, omit } from "lodash"
+import * as Oni from "oni-api"
+import { Event } from "oni-types"
+import * as React from "react"
 import { Provider } from "react-redux"
 import { Reducer, Store } from "redux"
+
 import { CockpitEditor } from "./CockpitEditor"
 
 export class CockpitTab {
@@ -22,6 +23,10 @@ function isActiveBuffer(buffer: Oni.Buffer | Oni.InactiveBuffer): buffer is Oni.
 }
 
 export class CockpitManager implements Oni.IWindowSplit {
+    public get isSoftHidden(): boolean {
+        return this.getActiveTabState().isHidden
+    }
+
     private split: Oni.WindowSplitHandle
     private store: Store<ICockpitManagerState>
     private cockpitEditor: Oni.Editor
@@ -81,8 +86,81 @@ export class CockpitManager implements Oni.IWindowSplit {
         this.oni.windows.updatePrimarySplits()
     }
 
-    public get isSoftHidden(): boolean {
-        return this.getActiveTabState().isHidden
+    public async pushToCockpit(): Promise<void> {
+        const buffer = this.mainEditor.activeBuffer
+        if (!buffer) {
+            return
+        }
+        const pos = await buffer.getCursorPosition()
+        this.store.dispatch({
+            type: "SET_BUFFER",
+            bufferId: buffer.id,
+            topLine: pos.line,
+        })
+        this.replaceCockpitBuffer(buffer.id)
+    }
+
+    public async pushToEditor(): Promise<void> {
+        const activeTab = this.getActiveTabState()
+        if (!activeTab.bufferId) {
+            return
+        }
+        await this.mainEditor.neovim.command(`:b ${activeTab.bufferId}`)
+        await this.setEditorCursorToState(this.mainEditor, activeTab.topLine)
+    }
+
+    public async swapEditors(): Promise<void> {
+        const buffer = this.mainEditor.activeBuffer
+        const activeTab = this.getActiveTabState()
+
+        if (!buffer.filePath && !activeTab.bufferId) {
+            return
+        } else if (!buffer.filePath) {
+            return this.pushToEditor()
+        } else if (!activeTab.bufferId) {
+            return this.pushToCockpit()
+        } else {
+            // swap
+            await this.mainEditor.neovim.command(":norm H")
+            const posEditorBefore = await buffer.getCursorPosition()
+            this.pushToEditor()
+            this.store.dispatch({
+                type: "SET_BUFFER",
+                bufferId: buffer.id,
+                topLine: posEditorBefore.line,
+            })
+            this.replaceCockpitBuffer(buffer.id)
+        }
+    }
+
+    public render(): JSX.Element {
+        return (
+            <Provider store={this.store}>
+                <div className="container full vertical">
+                    <h1>Cockpit</h1>
+                    <div style={{ flex: 1 }}>
+                        <CockpitEditor editor={this.cockpitEditor} />
+                    </div>
+                    <div className="enable-mouse" style={{ marginBottom: 20 }}>
+                        test:{" "}
+                        <button
+                            onClick={() => {
+                                this.oni.log.info("sc: test")
+                                this.store.dispatch({
+                                    type: "SET_BUFFER",
+                                    bufferId: "./test.js",
+                                    topLine: 0,
+                                })
+                            }}
+                        >
+                            click me
+                        </button>
+                        <div>bottom</div>
+                        <div>area</div>
+                    </div>
+                </div>
+            </Provider>
+        )
     }
 
     private async onBufLinesEvent(evt: Oni.IBufLinesEvent) {
@@ -95,11 +173,11 @@ export class CockpitManager implements Oni.IWindowSplit {
         await this.cockpitEditor.neovim.input("z<CR>")
         if (evt.lastline - evt.firstline === 1 && evt.linedata.length === 1) {
             // WARNING this doesn't work, it updates the syntax but doesn't recognized the tokens right
-            //await this.cockpitEditor.syntaxHighlighter.updateLine(
-            //evt.linedata[0],
-            //evt.firstline,
-            //this.cockpitEditor.activeBuffer,
-            //)
+            // await this.cockpitEditor.syntaxHighlighter.updateLine(
+            // evt.linedata[0],
+            // evt.firstline,
+            // this.cockpitEditor.activeBuffer,
+            // )
             const allLines = await this.cockpitEditor.activeBuffer.getLines()
             await this.cockpitEditor.syntaxHighlighter.updateBuffer(
                 allLines,
@@ -296,96 +374,14 @@ export class CockpitManager implements Oni.IWindowSplit {
     }
 
     private isSyncingBuffer(bufferId: string): boolean {
-        let ret: boolean
         const activeTab = this.getActiveTabState()
         const isSame = !!(
             activeTab &&
             activeTab.bufferId &&
             this.mainEditor.activeBuffer.id === activeTab.bufferId
         )
-        if (bufferId) {
-            ret = isSame && bufferId === activeTab.bufferId
-        } else {
-            ret = isSame
-        }
+        const ret = bufferId ? isSame && bufferId === activeTab.bufferId : isSame
         return !!ret
-    }
-
-    public async pushToCockpit(): Promise<void> {
-        const buffer = this.mainEditor.activeBuffer
-        if (!buffer) {
-            return
-        }
-        const pos = await buffer.getCursorPosition()
-        this.store.dispatch({
-            type: "SET_BUFFER",
-            bufferId: buffer.id,
-            topLine: pos.line,
-        })
-        this.replaceCockpitBuffer(buffer.id)
-    }
-
-    public async pushToEditor(): Promise<void> {
-        const activeTab = this.getActiveTabState()
-        if (!activeTab.bufferId) {
-            return
-        }
-        await this.mainEditor.neovim.command(`:b ${activeTab.bufferId}`)
-        await this.setEditorCursorToState(this.mainEditor, activeTab.topLine)
-    }
-
-    public async swapEditors(): Promise<void> {
-        const buffer = this.mainEditor.activeBuffer
-        const activeTab = this.getActiveTabState()
-
-        if (!buffer.filePath && !activeTab.bufferId) {
-            return
-        } else if (!buffer.filePath) {
-            return this.pushToEditor()
-        } else if (!activeTab.bufferId) {
-            return this.pushToCockpit()
-        } else {
-            // swap
-            await this.mainEditor.neovim.command(":norm H")
-            const posEditorBefore = await buffer.getCursorPosition()
-            this.pushToEditor()
-            this.store.dispatch({
-                type: "SET_BUFFER",
-                bufferId: buffer.id,
-                topLine: posEditorBefore.line,
-            })
-            this.replaceCockpitBuffer(buffer.id)
-        }
-    }
-
-    public render(): JSX.Element {
-        return (
-            <Provider store={this.store}>
-                <div className="container full vertical">
-                    <h1>Cockpit</h1>
-                    <div style={{ flex: 1 }}>
-                        <CockpitEditor editor={this.cockpitEditor} />
-                    </div>
-                    <div className="enable-mouse" style={{ marginBottom: 20 }}>
-                        test:{" "}
-                        <button
-                            onClick={() => {
-                                this.oni.log.info("sc: test")
-                                this.store.dispatch({
-                                    type: "SET_BUFFER",
-                                    bufferId: "./test.js",
-                                    topLine: 0,
-                                })
-                            }}
-                        >
-                            click me
-                        </button>
-                        <div>bottom</div>
-                        <div>area</div>
-                    </div>
-                </div>
-            </Provider>
-        )
     }
 }
 

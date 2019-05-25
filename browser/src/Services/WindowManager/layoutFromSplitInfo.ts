@@ -44,7 +44,7 @@ const layoutFromSplitInfoHelper = (
     }
 
     const visibleSplitsCount = split.splits.filter(
-        split => split.type === "Split" || (split.type === "Leaf" && !split.contents.isSoftHidden),
+        s => s.type === "Split" || (s.type === "Leaf" && !s.contents.isSoftHidden),
     ).length
 
     // Recursive case

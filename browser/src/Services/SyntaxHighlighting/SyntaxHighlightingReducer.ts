@@ -144,14 +144,14 @@ export const linesReducer: Reducer<SyntaxHighlightLines> = (
             return resetState
 
         case "SYNTAX_UPDATE_BUFFER_LINE_FORCED": {
-            const updatedBufferState: SyntaxHighlightLines = {
+            const updatedBufferLineForcedState: SyntaxHighlightLines = {
                 ...state,
             }
-            updatedBufferState[action.lineNumber] = {
-                ...updatedBufferState[action.lineNumber],
+            updatedBufferLineForcedState[action.lineNumber] = {
+                ...updatedBufferLineForcedState[action.lineNumber],
                 line: action.line,
             }
-            return updatedBufferState
+            return updatedBufferLineForcedState
         }
 
         case "SYNTAX_UPDATE_BUFFER":

@@ -568,7 +568,7 @@ export class NeovimEditor extends Editor implements Oni.Editor {
 
         // TODO: Add first class event for this
         this._neovimInstance.on("tabline-update", async (currentTabId: number, tabs: ITab[]) => {
-            let deletedTabIds = this._store.getState().tabState.tabs.map(tab => tab.id)
+            const deletedTabIds = this._store.getState().tabState.tabs.map(tab => tab.id)
             const atomicCalls = tabs.map((tab: ITab) => {
                 return ["nvim_call_function", ["tabpagebuflist", [tab.id]]]
             })
@@ -581,7 +581,7 @@ export class NeovimEditor extends Editor implements Oni.Editor {
             })
 
             this._actions.setTabs(currentTabId, tabs)
-            let evt: Oni.TabsUpdateEventArgs = { currentTabId }
+            const evt: Oni.TabsUpdateEventArgs = { currentTabId }
             if (deletedTabIds.length > 0) {
                 evt.deletedTabId = deletedTabIds[0]
             }

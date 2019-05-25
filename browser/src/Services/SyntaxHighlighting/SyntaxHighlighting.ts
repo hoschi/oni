@@ -198,7 +198,7 @@ export class NullSyntaxHighlighter implements Oni.ISyntaxHighlighter {
         // tslint: disable-line
     }
 
-    public async updateBuffer(lines: String[], buffer: Oni.Buffer): Promise<void> {
+    public async updateBuffer(lines: string[], buffer: Oni.Buffer): Promise<void> {
         return Promise.resolve(null)
     }
 
