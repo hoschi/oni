@@ -24,6 +24,17 @@ export function activate(oni: any): any {
 
     oni.commands.registerCommand(
         new Command(
+            "sideCockpit.setMasterFile",
+            "Cockpit: Set Master file",
+            "Set current file as master file",
+            () => {
+                cockpitManager.setMasterFile()
+            },
+        ),
+    )
+
+    oni.commands.registerCommand(
+        new Command(
             "sideCockpit.pushToCockpit",
             "Cockpit: Push to Cockpit",
             "Push current buffer to Cockpit",

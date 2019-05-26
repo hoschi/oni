@@ -10,6 +10,7 @@ import { CockpitEditor } from "./CockpitEditor"
 export class CockpitTab {
     public bufferId: string | null
     public topLine: number | null
+    public masterFile: string | null
     constructor(public tabId: number, public isHidden: boolean) {}
 }
 
@@ -131,6 +132,19 @@ export class CockpitManager implements Oni.IWindowSplit {
             })
             this.replaceCockpitBuffer(buffer.id)
         }
+    }
+
+    public setMasterFile(): void {
+        const buffer = this.mainEditor.activeBuffer
+
+        if (!buffer.filePath) {
+            return
+        }
+
+        this.store.dispatch({
+            type: "SET_MASTER_FILE",
+            filePath: buffer.filePath,
+        })
     }
 
     public render(): JSX.Element {
@@ -398,6 +412,10 @@ type CockpitManagerActions =
           type: "SET_HIDDEN"
           isHidden: boolean
       }
+    | {
+          type: "SET_MASTER_FILE"
+          filePath: string
+      }
 
 const cockpitManagerReducer: Reducer<ICockpitManagerState> = (
     state: ICockpitManagerState = DefaultCockpitManagerState,
@@ -424,6 +442,17 @@ const cockpitManagerReducer: Reducer<ICockpitManagerState> = (
                     [state.activeTabId]: {
                         ...state.tabs[state.activeTabId],
                         isHidden: action.isHidden,
+                    },
+                },
+            }
+        case "SET_MASTER_FILE":
+            return {
+                ...state,
+                tabs: {
+                    ...state.tabs,
+                    [state.activeTabId]: {
+                        ...state.tabs[state.activeTabId],
+                        masterFile: action.filePath,
                     },
                 },
             }
