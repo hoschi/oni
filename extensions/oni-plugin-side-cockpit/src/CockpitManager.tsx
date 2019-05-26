@@ -137,26 +137,9 @@ export class CockpitManager implements Oni.IWindowSplit {
         return (
             <Provider store={this.store}>
                 <div className="container full vertical">
-                    <h1>Cockpit</h1>
+                    <h3>Cockpit</h3>
                     <div style={{ flex: 1 }}>
                         <CockpitEditor editor={this.cockpitEditor} />
-                    </div>
-                    <div className="enable-mouse" style={{ marginBottom: 20 }}>
-                        test:{" "}
-                        <button
-                            onClick={() => {
-                                this.oni.log.info("sc: test")
-                                this.store.dispatch({
-                                    type: "SET_BUFFER",
-                                    bufferId: "./test.js",
-                                    topLine: 0,
-                                })
-                            }}
-                        >
-                            click me
-                        </button>
-                        <div>bottom</div>
-                        <div>area</div>
                     </div>
                 </div>
             </Provider>
