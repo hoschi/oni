@@ -228,7 +228,8 @@ export class CockpitManager implements Oni.IWindowSplit {
             await this.emptyCockpitEditor()
             activeTab = this.getActiveTabState()
         }
-        if (lastTab.isHidden !== activeTab.isHidden) {
+        if (!lastTab || lastTab.isHidden !== activeTab.isHidden) {
+            this.oni.log.info(`sc - update primary splits`)
             this.oni.windows.updatePrimarySplits()
         }
     }
