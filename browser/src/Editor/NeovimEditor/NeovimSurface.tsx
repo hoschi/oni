@@ -17,7 +17,7 @@ import { TypingPredictionManager } from "./../../Services/TypingPredictionManage
 import { Cursor } from "./../../UI/components/Cursor"
 import { CursorLine } from "./../../UI/components/CursorLine"
 import { InstallHelp } from "./../../UI/components/InstallHelp"
-import { TabsContainer } from "./../../UI/components/Tabs"
+import { TabsConnectedCockpit } from "./../../UI/components/TabsConnectedCockpit"
 import { ToolTips } from "./../../UI/components/ToolTip"
 
 import { StackLayer } from "../../UI/components/common"
@@ -72,7 +72,7 @@ class NeovimSurface extends React.Component<INeovimSurfaceProps> {
                 {({ setRef }) => (
                     <div className="container vertical full" ref={setRef}>
                         <div className="container fixed">
-                            <TabsContainer
+                            <TabsConnectedCockpit
                                 onBufferSelect={this.props.onBufferSelect}
                                 onBufferClose={this.props.onBufferClose}
                                 onTabClose={this.props.onTabClose}

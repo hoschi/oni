@@ -10,6 +10,7 @@ import { connect } from "react-redux"
 
 import * as BufferSelectors from "./../../Editor/NeovimEditor/NeovimEditorSelectors"
 import * as State from "./../../Editor/NeovimEditor/NeovimEditorStore"
+import { IFakeCockpitManagerState } from "./../../CockpitTypes"
 
 import { addDefaultUnitIfNeeded } from "./../../Font"
 
@@ -38,9 +39,12 @@ export interface ITabProps {
     iconFileName?: string
     userColor?: string
     shouldWrap?: boolean
+    isMasterTab: boolean
 }
 
 export interface ITabContainerProps {
+    cockpitState?: IFakeCockpitManagerState
+
     onBufferSelect?: (bufferId: number) => void
     onBufferClose?: (bufferId: number) => void
 
@@ -305,6 +309,7 @@ export interface ITabPropsWithClick extends ITabProps {
     maxWidth: string
     mode: string
     shouldShowHighlight: boolean
+    isMasterTab: boolean
 }
 
 interface IScrollIntoView {
@@ -349,6 +354,7 @@ export class Tab extends React.PureComponent<ITabPropsWithClick> {
             onClickClose,
             onClickName,
             shouldShowHighlight,
+            isMasterTab,
         } = this.props
 
         const tabStatus = this.getStatus(isSelected, isDirty)
@@ -374,7 +380,7 @@ export class Tab extends React.PureComponent<ITabPropsWithClick> {
                         />
                     </Corner>
                     <Name onMouseDown={this.handleTitleClick}>
-                        <InnerName>{name}</InnerName>
+                        <InnerName>{isMasterTab ? "M: " + name : name}</InnerName>
                     </Name>
                     <Corner data-id="tab-close-button" isHoverEnabled onClick={onClickClose}>
                         <IconContainer isVisibleByDefault={false} isVisibleOnTabHover>
@@ -493,6 +499,7 @@ const getTabsFromBuffers = createSelector(
                 shouldShowHighlight: showHighlight,
                 isSelected: isActive,
                 isDirty: buf.modified,
+                isMasterTab: false,
                 description: buf.file,
             }
         })
@@ -501,12 +508,19 @@ const getTabsFromBuffers = createSelector(
 )
 
 const getTabsFromVimTabs = createSelector(
-    [getTabState, showTabId, shouldShowFileIcon, BufferSelectors.getBufferMetadata],
+    [
+        getTabState,
+        showTabId,
+        shouldShowFileIcon,
+        BufferSelectors.getBufferMetadata,
+        (state: State.IState, props: ITabContainerProps) => props.cockpitState,
+    ],
     (
         tabState: State.ITabState,
         shouldShowId: boolean,
         showFileIcon: boolean,
         allBuffers: State.IBuffer[],
+        cockpitState: IFakeCockpitManagerState,
     ) => {
         return tabState.tabs.map((t, idx) => ({
             id: idx + 1,
@@ -514,6 +528,11 @@ const getTabsFromVimTabs = createSelector(
             iconFileName: showFileIcon ? getTabName(t.name) : "",
             isSelected: t.id === tabState.selectedTabId,
             isDirty: checkTabBuffers(t.buffersInTab, allBuffers),
+            isMasterTab: !!(
+                cockpitState &&
+                cockpitState.tabs[t.id] &&
+                cockpitState.tabs[t.id].masterFile
+            ),
             description: t.name,
         }))
     },
@@ -523,7 +542,7 @@ const mapStateToProps = (state: State.IState, ownProps: ITabContainerProps): ITa
     const oniTabMode = state.configuration["tabs.mode"]
     const shouldUseVimTabs = oniTabMode === "tabs"
 
-    const tabs = shouldUseVimTabs ? getTabsFromVimTabs(state) : getTabsFromBuffers(state)
+    const tabs = shouldUseVimTabs ? getTabsFromVimTabs(state, ownProps) : getTabsFromBuffers(state)
 
     const visible = oniTabMode !== "native" && oniTabMode !== "hidden"
 
