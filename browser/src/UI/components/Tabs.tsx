@@ -17,7 +17,6 @@ import { addDefaultUnitIfNeeded } from "./../../Font"
 import { Sneakable } from "./../../UI/components/Sneakable"
 import { Icon } from "./../../UI/Icon"
 import styled, {
-    boxShadowUp,
     boxShadowUpInset,
     css,
     enableMouse,
@@ -33,13 +32,14 @@ import { FileIcon } from "./../../Services/FileIcon"
 export interface ITabProps {
     id: number
     name: string
+    prefix: string
     description: string
     isSelected: boolean
     isDirty: boolean
     iconFileName?: string
     userColor?: string
     shouldWrap?: boolean
-    isMasterTab: boolean
+    masterFile?: string
 }
 
 export interface ITabContainerProps {
@@ -85,6 +85,7 @@ const TabsWrapper = styled<ITabsWrapperProps, "div">("div")`
         height: 3px;
     }
     ${scrollbarStyles};
+    background-color: lightgrey;
 `
 
 export interface ITabsProps {
@@ -110,6 +111,10 @@ const InnerName = styled.span`
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
+`
+
+const InnerSecondaryName = styled.span`
+    opacity: 0.6;
 `
 
 export const Tabs: React.SFC<ITabsProps> = props => {
@@ -151,6 +156,7 @@ export const Name = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-direction: column;
     margin: 0px 4px;
 `
 
@@ -195,6 +201,7 @@ interface ITabWrapperProps {
     maxWidth: string
     mode: string
     shouldShowHighlight: boolean
+    masterFile?: string
 }
 
 const sanitizedModeForColors = (mode: string): string => {
@@ -222,7 +229,6 @@ export const getHighlightColor = (props: {
 }
 
 const active = css`
-    ${boxShadowUp};
     opacity: 1;
 `
 
@@ -243,7 +249,7 @@ const TabWrapper = styled<ITabWrapperProps, "div">("div")`
     cursor: pointer;
     flex: 0 0 auto;
     max-width: ${props => props.maxWidth};
-    height: ${props => props.height};
+    height: ${props => (props.masterFile ? props.height : "1.8em")};
     transition: opacity 0.25s;
     overflow: hidden;
     user-select: none;
@@ -309,7 +315,8 @@ export interface ITabPropsWithClick extends ITabProps {
     maxWidth: string
     mode: string
     shouldShowHighlight: boolean
-    isMasterTab: boolean
+    masterFile?: string
+    prefix: string
 }
 
 interface IScrollIntoView {
@@ -342,7 +349,9 @@ export class Tab extends React.PureComponent<ITabPropsWithClick> {
 
     public render() {
         const {
+            prefix,
             name,
+            masterFile,
             description,
             height,
             maxWidth,
@@ -354,7 +363,6 @@ export class Tab extends React.PureComponent<ITabPropsWithClick> {
             onClickClose,
             onClickName,
             shouldShowHighlight,
-            isMasterTab,
         } = this.props
 
         const tabStatus = this.getStatus(isSelected, isDirty)
@@ -371,6 +379,7 @@ export class Tab extends React.PureComponent<ITabPropsWithClick> {
                     isDirty={isDirty}
                     isSelected={isSelected}
                     shouldShowHighlight={shouldShowHighlight}
+                    masterFile={masterFile}
                 >
                     <Corner data-id="tab-icon-corner" onMouseDown={this.handleTitleClick}>
                         <FileIcon
@@ -380,7 +389,8 @@ export class Tab extends React.PureComponent<ITabPropsWithClick> {
                         />
                     </Corner>
                     <Name onMouseDown={this.handleTitleClick}>
-                        <InnerName>{isMasterTab ? "M: " + name : name}</InnerName>
+                        {masterFile && <InnerSecondaryName>{masterFile}</InnerSecondaryName>}
+                        <InnerName>{prefix + name}</InnerName>
                     </Name>
                     <Corner data-id="tab-close-button" isHoverEnabled onClick={onClickClose}>
                         <IconContainer isVisibleByDefault={false} isVisibleOnTabHover>
@@ -490,16 +500,15 @@ const getTabsFromBuffers = createSelector(
             const isDuplicate = checkDuplicate(buf.file, names)
             const isActive =
                 (activeBufferId !== null && buf.id === activeBufferId) || bufferCount === 1
-            const name =
-                getIdPrefix(buf.id.toString(), shouldShowId) + getTabName(buf.file, isDuplicate)
             return {
                 id: buf.id,
-                name,
+                name: getTabName(buf.file, isDuplicate),
+                prefix: getIdPrefix(buf.id.toString(), shouldShowId),
                 iconFileName: showFileIcon ? getTabName(buf.file) : "",
                 shouldShowHighlight: showHighlight,
                 isSelected: isActive,
                 isDirty: buf.modified,
-                isMasterTab: false,
+                masterFile: undefined,
                 description: buf.file,
             }
         })
@@ -524,15 +533,16 @@ const getTabsFromVimTabs = createSelector(
     ) => {
         return tabState.tabs.map((t, idx) => ({
             id: idx + 1,
-            name: getIdPrefix((idx + 1).toString(), shouldShowId) + getTabName(t.name),
+            name: getTabName(t.name),
+            prefix: getIdPrefix((idx + 1).toString(), shouldShowId),
             iconFileName: showFileIcon ? getTabName(t.name) : "",
             isSelected: t.id === tabState.selectedTabId,
             isDirty: checkTabBuffers(t.buffersInTab, allBuffers),
-            isMasterTab: !!(
+            masterFile:
                 cockpitState &&
                 cockpitState.tabs[t.id] &&
-                cockpitState.tabs[t.id].masterFile
-            ),
+                cockpitState.tabs[t.id].masterFile &&
+                getTabName(cockpitState.tabs[t.id].masterFile),
             description: t.name,
         }))
     },
