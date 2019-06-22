@@ -3,8 +3,8 @@ import { Store } from "redux"
 
 import * as Log from "oni-core-logging"
 
-import { getInstance as getPluginManagerInstance } from "./../../Plugins/PluginManager"
 import { IFakeCockpitManagerState } from "./../../CockpitTypes"
+import { getInstance as getPluginManagerInstance } from "./../../Plugins/PluginManager"
 
 import { TabsContainer } from "./Tabs"
 

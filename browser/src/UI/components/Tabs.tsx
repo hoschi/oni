@@ -8,9 +8,9 @@ import { createSelector } from "reselect"
 import * as React from "react"
 import { connect } from "react-redux"
 
+import { IFakeCockpitManagerState } from "./../../CockpitTypes"
 import * as BufferSelectors from "./../../Editor/NeovimEditor/NeovimEditorSelectors"
 import * as State from "./../../Editor/NeovimEditor/NeovimEditorStore"
-import { IFakeCockpitManagerState } from "./../../CockpitTypes"
 
 import { addDefaultUnitIfNeeded } from "./../../Font"
 
