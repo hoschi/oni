@@ -147,6 +147,13 @@ export class CockpitManager implements Oni.IWindowSplit {
         })
     }
 
+    public unsetMasterFile(): void {
+        this.store.dispatch({
+            type: "SET_MASTER_FILE",
+            filePath: undefined,
+        })
+    }
+
     public goToMasterFile(): void {
         const activeTab = this.getActiveTabState()
 
@@ -424,7 +431,7 @@ type CockpitManagerActions =
       }
     | {
           type: "SET_MASTER_FILE"
-          filePath: string
+          filePath: string | undefined
       }
 
 const cockpitManagerReducer: Reducer<ICockpitManagerState> = (

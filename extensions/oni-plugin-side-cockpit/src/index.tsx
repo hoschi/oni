@@ -35,6 +35,17 @@ export function activate(oni: any): any {
 
     oni.commands.registerCommand(
         new Command(
+            "sideCockpit.unsetMasterFile",
+            "Cockpit: Unset Master file",
+            "Unset current master file",
+            () => {
+                cockpitManager.unsetMasterFile()
+            },
+        ),
+    )
+
+    oni.commands.registerCommand(
+        new Command(
             "sideCockpit.goToMasterFile",
             "Cockpit: Go to master file",
             "Open master file in current editor",
