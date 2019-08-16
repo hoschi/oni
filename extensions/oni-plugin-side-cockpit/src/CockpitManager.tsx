@@ -311,8 +311,6 @@ export class CockpitManager implements Oni.IWindowSplit {
         if (!buffer) {
             throw new Error("Can't find buffer by id: " + bufferId)
         }
-        await this.cockpitEditor.neovim.command(":GitGutterDisable")
-        this.oni.log.info(`sc - disabled Git Gutter`)
         await this.emptyCockpitEditor()
         await this.cockpitEditor.openFile(buffer.filePath, {
             openMode: Oni.FileOpenMode.ExistingTab,
@@ -352,8 +350,6 @@ export class CockpitManager implements Oni.IWindowSplit {
         }
 
         await this.setEditorCursorToState(this.cockpitEditor, activeTab.topLine)
-        await this.cockpitEditor.neovim.command(":GitGutterEnable")
-        this.oni.log.info(`sc - enabled Git Gutter`)
     }
 
     private async setEditorCursorToState(editor: Oni.Editor, topLine: number): Promise<void> {
