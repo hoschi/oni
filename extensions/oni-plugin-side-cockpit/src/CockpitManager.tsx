@@ -147,6 +147,16 @@ export class CockpitManager implements Oni.IWindowSplit {
         })
     }
 
+    public goToMasterFile(): void {
+        const activeTab = this.getActiveTabState()
+
+        if (!activeTab.masterFile) {
+            return
+        }
+
+        this.mainEditor.neovim.command(`:e ${activeTab.masterFile}`)
+    }
+
     public render(): JSX.Element {
         return (
             <Provider store={this.store}>
